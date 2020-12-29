@@ -1,5 +1,4 @@
-## John Wilkin's m-files for working with Regional Ocean Modeling System (ROMS; http://www.myroms.org) files.
+## John Wilkin's files for working with the Regional Ocean Modeling System (ROMS; http://www.myroms.org)
 
-Earlier versions documented in http://romsmatlab.tiddlyspot.com/ and managed via svn https://www.myroms.org/svn/om/matlab/roms_wilkin/
-
-Created March 2008
+Matlab roms_wilkin tools previously managed via svn at https://www.myroms.org/svn/om/matlab/roms_wilkin/
+(created Matach 2008) and documented at http://romsmatlab.tiddlyspot.com/ are in the folder "matlab".
