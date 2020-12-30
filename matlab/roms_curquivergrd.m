@@ -29,6 +29,8 @@ function [han,data] = roms_curquivergrd(u,v,grd,lon0,lat0,td,nd,varargin)
 %
 % John Wilkin - September 2019
 % Created to support curvy vectors in roms_zview/roms_sview
+%
+% Copyright (c) 2021 - John L. Wilkin - jwilkin@rutgers.edu
 % $Id: roms_curquivergrd.m 563 2020-03-30 15:22:38Z robertson $
 
 % there is an option to compute tracks but not plot them

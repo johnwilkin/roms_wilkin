@@ -35,6 +35,8 @@ function [han,data] = roms_quivergrd(u,v,grd,d,uscale,varargin)
 %        to rho-grid locations, and rotated to east-north coordinates)
 % 
 % John Wilkin
+%
+% Copyright (c) 2021 - John L. Wilkin - jwilkin@rutgers.edu
 % $Id: roms_quivergrd.m 556 2020-01-19 01:08:38Z robertson $
 
 % get plot state

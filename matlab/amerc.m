@@ -1,6 +1,9 @@
 function [xrng,yrng] = amerc
-% $Id: amerc.m 358 2008-04-07 14:15:03Z zhang $
 % set DataAspectRatio to Mercator proportions at figure centre
+%
+% Copyright (c) 2021 - John L. Wilkin - jwilkin@rutgers.edu
+% $Id$
+
 ylim = get(gca,'ylim');
 set(gca,'DataAspectRatio',[1 cos(mean(ylim)*pi/180) 1]);
 %set(gca,'DataAspectRatioMode','auto');

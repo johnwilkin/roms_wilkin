@@ -12,6 +12,9 @@ function [i,j,dist]=closest(X,Y,xi,yi)
 %	John Wilkin, 4 November 93 
 % mods 9 Oct 2007 to allow roms grid structure as first input (to save 
 % typing lon,lat all the time) 
+%
+% Copyright (c) 2021 - John L. Wilkin - jwilkin@rutgers.edu
+% $Id$
 
 if isstruct(X)
   % assume this is a roms grd structure

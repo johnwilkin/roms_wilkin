@@ -54,7 +54,7 @@ function grd = roms_get_grid(grd_file,scoord,tindex,~)
 % June 2016:
 %   Added cell area and cell volume to output
 %
-% Copyright (c) 2020 - John L. Wilkin - jwilkin@rutgers.edu
+% Copyright (c) 2021 - John L. Wilkin - jwilkin@rutgers.edu
 % $Id: roms_get_grid.m 596 2020-12-29 16:46:14Z wilkin $
 
 % This was confusing people so disable warning

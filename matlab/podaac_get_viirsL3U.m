@@ -49,7 +49,6 @@ function [data,geo,info] = podaac_get_viirsL3U(sat,dnum,bbox)
 %   INFO gives aspects of the documentation of this dataset.
 %
 % John Wilkin - July 2020
-% $Id: podaac_get_viirsL3U.m 582 2020-10-12 15:12:20Z wilkin $
 %
 % EXAMPLE USAGE:
 %
@@ -57,6 +56,9 @@ function [data,geo,info] = podaac_get_viirsL3U(sat,dnum,bbox)
 % dnum = datenum(2020,7,1)+[0 1];
 % [data1,geo1,info1] = podaac_get_viirsL3U('N20',dnum,bbox);
 % [data2,geo2,info2] = podaac_get_viirsL3U('NPP',dnum,bbox);
+%
+% Copyright (c) 2021 - John L. Wilkin - jwilkin@rutgers.edu
+% $Id: podaac_get_viirsL3U.m 582 2020-10-12 15:12:20Z wilkin $
 
 if nargin < 1
   

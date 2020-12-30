@@ -1,6 +1,5 @@
 function [Data,hax] = roms_bviews(file,varname,time,blist,grd)
 % [DATA,HAX] = roms_bviews(file,var,time,blist,grd)
-% $Id: roms_bviews.m 522 2018-12-12 19:32:06Z wilkin $
 %
 % Like roms_bview but stitches together several boundaries given in the
 % boundary list BLIST in the order given using a set of axes adjacent to
@@ -26,6 +25,9 @@ function [Data,hax] = roms_bviews(file,varname,time,blist,grd)
 %   HAX is a vector of handles to the plot axes
 %
 % John Wilkin - Sept 2018
+%
+% Copyright (c) 2021 - John L. Wilkin - jwilkin@rutgers.edu
+% $Id: roms_bviews.m 522 2018-12-12 19:32:06Z wilkin $
 
 nax = length(blist);
 axm = floor(nax/2)+1;

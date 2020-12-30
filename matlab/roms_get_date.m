@@ -16,6 +16,8 @@ function [Dnum,Dstr] = roms_get_date(file,tindex,dateformat,timevarname)
 %
 % WOULD BE GOOD TO DO AWAY WITH PARSETNC <<<<<<<<<< !!!!!!! <<<<<<<<<<<<<
 % and allow time = Inf to get the latest value in the file
+%
+% Copyright (c) 2021 - John L. Wilkin - jwilkin@rutgers.edu
 
 if nargin < 2
   tindex = -1;

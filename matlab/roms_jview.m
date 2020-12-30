@@ -30,7 +30,7 @@ function [Data,han] = roms_jview(file,var,time,jindex,grd,cplot,clev)
 %        
 % John Wilkin jwilkin@rutgers.edu
 %
-% Copyright (c) 2020 John L. Wilkin 
+% Copyright (c) 2021 - John L. Wilkin - jwilkin@rutgers.edu
 % $Id: roms_jview.m 592 2020-12-28 21:56:28Z wilkin $
 %
 % See also ROMS_ZVIEW, ROMS_SVIEW, ROMS_IVIEW

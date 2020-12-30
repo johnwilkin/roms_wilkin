@@ -31,7 +31,7 @@ function [diff2,uPec,vPec] = roms_diff_grid(g,tnu2)
 %
 % John Wilkin - January 2017
 %
-% Copyright (c) 2020 - John L. Wilkin - jwilkin@rutgers.edu
+% Copyright (c) 2021 - John L. Wilkin - jwilkin@rutgers.edu
 % $Id: roms_diff_grid.m 598 2020-12-29 16:50:22Z wilkin $
 
 dA = 1./(g.pm.*g.pn);

@@ -24,6 +24,8 @@ function [han,mooring,hant] = pioneer_plot_mooring_sites(varargin)
 % location data corrected on Aug 7, 2018, from longitude/latitude data at
 % at http://www.myroms.org:8080/erddap/info/index.html superceding nominal
 % information at http://oceanobservatories.org/array/coastal-pioneer
+%
+% Copyright (c) 2021 - John L. Wilkin - jwilkin@rutgers.edu
 % $Id: pioneer_plot_mooring_sites.m 585 2020-10-12 20:20:53Z wilkin $
 
 % get plot state

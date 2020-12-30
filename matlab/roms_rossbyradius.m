@@ -10,6 +10,8 @@ function [R,S] = roms_rossbyradius(T,S,g)
 % if a pool of parallel workers is active (e.g. parpool(4))
 %
 % John Wilkin - June 2020
+%
+% Copyright (c) 2021 - John L. Wilkin - jwilkin@rutgers.edu
 % $Id: roms_rossbyradius.m 587 2020-10-16 14:32:09Z wilkin $
 
 p = gcp('nocreate');

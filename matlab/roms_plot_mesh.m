@@ -15,7 +15,7 @@ function h = roms_plot_mesh(g,varargin)
 %         'wet' = discrete land/sea boundary from wet/dry mask - must have 
 %                       loaded wet/dry masks with roms_get_grid(f,f,tindex) 
 %
-% Copyright (c) 2020 - John L. Wilkin - jwilkin@rutgers.edu
+% Copyright (c) 2021 - John L. Wilkin - jwilkin@rutgers.edu
 % $Id: roms_plot_mesh.m 597 2020-12-29 16:48:48Z wilkin $
 
 if nargin==0

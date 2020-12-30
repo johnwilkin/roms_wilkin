@@ -18,7 +18,7 @@
 %
 % John Wilkin - December 2020
 %
-% Copyright (c) 2020 John L. Wilkin 
+% Copyright (c) - 2021 John L. Wilkin - jwilkin@rutgers.edu
 % $Id: roms_write_era5_NCARds633_frcfile.m 600 2020-12-29 19:19:51Z wilkin $
 
 %% ------------------------------------------------------------------------

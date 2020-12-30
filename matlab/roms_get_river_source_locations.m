@@ -49,7 +49,7 @@ function [R,button] = roms_get_river_source_locations(g,lon,lat)
 %
 % John Wilkin - August 27, 2016 - jwilkin@rutgers.edu
 %
-% Copyright (c) 2020 - John L. Wilkin
+% Copyright (c) 2021 - John L. Wilkin - jwilkin@rutgers.edu
 % $Id: roms_get_river_source_locations.m 595 2020-12-28 22:03:45Z wilkin $
 
 switch nargin

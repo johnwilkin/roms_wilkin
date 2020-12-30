@@ -1,5 +1,4 @@
 function map = zebra(a,n,m);
-% $Id: zebra.m 358 2008-04-07 14:15:03Z zhang $
 % zebra palette colormap with NBANDS broad bands and NENTRIES rows in
 % the color map - just try it, e.g. colormap(zebra) 
 %
@@ -11,7 +10,10 @@ function map = zebra(a,n,m);
 % Palettes, IEEE Transactions on Geosciences and Remote Sensing, vol. 33,
 % 1306-1312, 1995
 %
-% John Wilkin
+% John Wilkin - 1998
+%
+% Copyright (c) 2021 - John L. Wilkin - jwilkin@rutgers.edu
+% $Id$
 
 if nargin < 3
   m = 0.5; % saturation and value go from m to 1

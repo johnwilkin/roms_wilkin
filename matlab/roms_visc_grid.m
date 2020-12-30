@@ -38,7 +38,7 @@ function [visc2,uRe,vRe] = roms_visc_grid(g,uvnu2)
 %
 % John Wilkin - during COVID-19 lockdown
 %
-% Copyright (c) 2020 - John L. Wilkin - jwilkin@rutgers.edu
+% Copyright (c) 2021 - John L. Wilkin - jwilkin@rutgers.edu
 % $Id: roms_visc_grid.m 596 2020-12-29 16:46:14Z wilkin $
 
 dA = 1./(g.pm.*g.pn);

@@ -1,5 +1,4 @@
 function [vint,varargout] = roms_zint(data,grd,varargin)
-% $Id: roms_zint.m 483 2018-05-17 14:47:48Z robertson $
 % ROMS_ZINT:  vertical integral at rho points from depth z1 to z2
 %
 % USAGE:  [vint,thickness,dz] = roms_zint212(data,grd);
@@ -68,6 +67,9 @@ function [vint,varargout] = roms_zint(data,grd,varargin)
 %
 % John Wilkin 2008
 % with John Evans
+%
+% Copyright (c) 2021 - John L. Wilkin - jwilkin@rutgers.edu
+% $Id: roms_zint.m 483 2018-05-17 14:47:48Z robertson $
 
 % Set up defaults.
 INTEGRATE_OVER_ENTIRE_WATER_COLUMN = 0;  % do not integrate over entire water column.

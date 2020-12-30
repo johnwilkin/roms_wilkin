@@ -6,7 +6,6 @@ function roms_kmz(filename,varargin)
 % Usage:
 %        roms_kmz(outputfilename)
 %
-%
 % John Wilkin 7 March 2010
 %
 % need export_fig from
@@ -15,6 +14,9 @@ function roms_kmz(filename,varargin)
 %
 % need matlab googleearth toolbox from
 % http://code.google.com/p/googleearthtoolbox/
+%
+% Copyright (c) 2021 - John L. Wilkin - jwilkin@rutgers.edu
+% $Id$
 
 if exist('export_fig','file')~=2
   warning('ROMS_KMZ:NeedExportFig',...

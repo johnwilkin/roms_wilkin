@@ -4,6 +4,9 @@ function [cpp1,cpp2] = roms_cpplist(file,file2)
 % If two files are input the options are compared
 %
 % John Wilkin
+%
+% Copyright (c) 2021 - John L. Wilkin - jwilkin@rutgers.edu
+% $Id$
 
 cpp = nc_attget(file,nc_global,'CPP_options');
 c = strfind(cpp,',');

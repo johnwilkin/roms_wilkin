@@ -29,6 +29,8 @@ function [short,long,num] = doppio_provenance_lookup(prov)
 % edited by Julia Levin and John Wilkin
 %
 % John Wilkin - 18 April 2018
+%
+% Copyright (c) 2021 - John L. Wilkin - jwilkin@rutgers.edu
 % $Id: doppio_provenance_lookup.m 545 2020-01-09 19:41:09Z wilkin $
 
 server =  'http://tds.marine.rutgers.edu/erddap/tabledap/';

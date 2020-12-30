@@ -13,7 +13,8 @@ function callsfindstr(s,str,notstr)
 %      callsfindstr(S,'wilkin','roms_wilkin')
 %
 % John Wilkin
-% $Id: callsfindstr.m 565 2020-03-30 15:24:19Z robertson $
+%
+% Copyright (c) 2021 - John L. Wilkin - jwilkin@rutgers.edu
 
 if nargin == 2
   opt = 1;    % just find if str occurs

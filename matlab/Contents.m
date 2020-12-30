@@ -8,7 +8,7 @@ echo on
 % System (ROMS) (https://www.myroms.org)
 %
 % This collection of tools was originally created March 2008 (some are much
-% older) for release to the ROMS USer community.  Prior to December 2020 
+% older) for release to the ROMS User community.  Prior to December 2020 
 % the code set was managed by svn and accessible with login credentials for
 % the myroms.org portal ...
 %    svn checkout https://www.myroms.org/svn/om/matlab/roms_wilkin
@@ -24,7 +24,7 @@ echo on
 %
 % For extracting and plotting ROMS model output:
 %
-% roms_get_grid.m	   - load the coordinates (used by most functions)
+% roms_get_grid.m    - load the coordinates (used by most functions)
 % roms_get_ijgrid.m  - load coordinates in i,j space 
 % roms_nget_grid.m   - for nested grids
 % roms_zview.m       - plot a constant z slice
@@ -35,9 +35,9 @@ echo on
 % roms_jview.m       - plot a constant j-index slice
 % roms_bview.m       - plot boundary conditions
 % roms_bviews.m	     - stitch multiple boundaries together in one plot
-% roms_genslice.m	   - extract data at all depths along lon/lat/time path
+% roms_genslice.m    - extract data at all depths along lon/lat/time path
 % roms_zgenslice.m   - like genslice but 4-D extraction at specific depths
-% roms_kmz.m	       - old (might not work at all) 
+% roms_kmz.m         - old (might not work at all) 
 %
 % Supporting functions for the plots
 %
@@ -51,7 +51,7 @@ echo on
 % roms_addvect_scale.m    - add vector scale
 % roms_quivergrd.m        - plotting C-grid staggered vectors
 % roms_curquivergrd.m     - "curvy" vectors (pseudo particle tracks)
-% roms_get_date.m			    - parse date/time (needs work)
+% roms_get_date.m         - parse date/time (needs work)
 % 
 % Visualizing the grid
 %
@@ -64,7 +64,7 @@ echo on
 %
 % roms_uvrhotate.m        - rotate i,j vectors to east-north
 % roms_cpplist.m          - parse CPP list from output file 
-% roms_cgridpos.m	        - determine C-grid position from the shape 
+% roms_cgridpos.m         - determine C-grid position from the shape 
 % roms_varlist.m          - cell array of common subsets of ROMS variables 
 % roms_diff_grid.m        - get spatially variable viscosity
 % roms_visc_grid.m        - get spatially variable diffusivity
@@ -102,9 +102,12 @@ echo on
 % pioneer_mplot_gliders_nominal_tracks.m   - with m_map toolbox
 %
 % Miscellaneous colormaps - I have many more
+%
 % rscolmap.m       - CSIRO ocean color
 % coolavhrrmap.m   - RU COOL SST 
 % zebra.m          
 %
-% Copyright (c) 2020 - John L. Wilkin - jwilkin@rutgers.edu
+% Copyright (c) 2021 - John L. Wilkin - jwilkin@rutgers.edu
+% $Id$
+
 echo off

@@ -9,6 +9,9 @@ function han = roms_addvect_scale(pos,uv,uscale,label,varargin)
 %  varargin = arguments to quiver, e.g. vector color
 %
 % John Wilkin
+%
+% Copyright (c) 2021 - John L. Wilkin - jwilkin@rutgers.edu
+% $Id$
   
 % add a scale vector to the plot
 
