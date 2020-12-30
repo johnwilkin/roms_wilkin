@@ -10,7 +10,8 @@ function varlistout = roms_varlist(varargin)
 %   usecos, usecosC (new C variables only), dom (synonym)
 %   biodiags (all), fenneldiags (just fennel), usecosdiags (just usecos)
 %   bulkflux
-
+%
+% Copyright (c) 2021 - John L. Wilkin - jwilkin@rutgers.edu
 % $Id: roms_varlist.m 526 2019-05-15 18:59:30Z wilkin $
 
 if nargin == 0

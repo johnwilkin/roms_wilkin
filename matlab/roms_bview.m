@@ -13,7 +13,7 @@ function [Data,han] = roms_bview(file,varname,time,bndy,grd,xcoord)
 %
 % John Wilkin jwilkin@rutgers.edu
 %
-% Copyright (c) 2020 John L. Wilkin 
+% Copyright (c) 2021 - John L. Wilkin - jwilkin@rutgers.edu
 % $Id: roms_bview.m 592 2020-12-28 21:56:28Z wilkin $
 
 if nargin < 5

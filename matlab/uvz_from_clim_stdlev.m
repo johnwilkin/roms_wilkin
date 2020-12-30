@@ -1,5 +1,4 @@
 function clm = uvz_from_clim_stdlev(clm,pref,hmean)
-% $Id: uvz_from_clim_stdlev.m 358 2008-04-07 14:15:03Z zhang $
 % Compute u,v geostrophic from a standard level t,s,ssh climatology
 %
 % clm = uvz_from_clim_stdlev(clm,pref)
@@ -31,6 +30,9 @@ function clm = uvz_from_clim_stdlev(clm,pref,hmean)
 %              height (h***) with the mean removed
 %
 % John Wilkin Dec 2000
+%
+% Copyright (c) 2021 - John L. Wilkin - jwilkin@rutgers.edu
+% $Id: uvz_from_clim_stdlev.m 358 2008-04-07 14:15:03Z zhang $
 
 % separate out the data -----------------------------------------------
 

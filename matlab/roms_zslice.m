@@ -2,8 +2,6 @@ function [data,x,y,t,grd] = roms_zslice(file,var,time,depth,grd)
 % [data,x,y] = roms_zslice(file,var,time,depth,grd)
 % Get a constant-z slice out of a ROMS history, averages or restart file
 %
-% $Id: roms_zslice.m 564 2020-03-30 15:23:14Z robertson $
-%
 % Inputs
 %    file = his or avg nc file
 %    var = variable name
@@ -18,6 +16,9 @@ function [data,x,y,t,grd] = roms_zslice(file,var,time,depth,grd)
 %    t = time in days for the data
 %
 % John Wilkin
+%
+% Copyright (c) 2021 - John L. Wilkin - jwilkin@rutgers.edu
+% $Id: roms_zslice.m 564 2020-03-30 15:23:14Z robertson $
 
 % accommodate idiots who give positive z when it should be negative
 depth = -abs(depth);

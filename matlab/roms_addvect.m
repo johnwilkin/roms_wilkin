@@ -24,7 +24,7 @@ function [thedata,thegrid,han] = roms_addvect(file,var,time,depth,grd,vec_d,usca
 %
 % John Wilkin jwilkin@rutgers.edu
 %
-% Copyright (c) 2020 John L. Wilkin 
+% Copyright (c) 2021 - John L. Wilkin - jwilkin@rutgers.edu
 % $Id: roms_addvect.m 601 2020-12-29 19:20:10Z wilkin $
 
 if nargin < 5

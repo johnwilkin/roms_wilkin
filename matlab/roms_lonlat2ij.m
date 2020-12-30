@@ -12,6 +12,8 @@ function [Fi,Fj] = roms_lonlat2ij(grd)
 % Ygrid = Fj(obs_lon,obs_lat)
 %
 % John Wilkin - Nov 2018
+%
+% Copyright (c) 2021 - John L. Wilkin - jwilkin@rutgers.edu
 % $Id: roms_lonlat2ij.m 548 2020-01-18 23:23:36Z robertson $
 
 if isstruct(grd)

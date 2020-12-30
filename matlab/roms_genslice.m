@@ -105,7 +105,7 @@ function [Tvar,Coord] = ...
 % spent in the repeated ncread calls but not sure if anything much can be
 % done about that.
 %
-% Copyright (c) 2020 - John L. Wilkin - jwilkin@rutgers.edu 
+% Copyright (c) 2021 - John L. Wilkin - jwilkin@rutgers.edu 
 % $Id: roms_genslice.m 597 2020-12-29 16:48:48Z wilkin $
 
 %% Check inputs

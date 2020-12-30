@@ -1,11 +1,13 @@
 function han = roms_plot_bathy(grd,cmap,clev,var);
-% $Id: roms_plot_bathy.m 387 2009-10-14 13:30:50Z wilkin $
 % han = roms_plot_bathy(grd,cmap,clev,var);
 % 
 % defaults:
 %    clev = [100 250 500 1000:1000:4000];
 %    cmap = zebra(2,64);
 %    var = 'h' (if var='r' r-value is plotted)
+%
+% Copyright (c) 2021 - John L. Wilkin - jwilkin@rutgers.edu
+% $Id: roms_plot_bathy.m 387 2009-10-14 13:30:50Z wilkin $
 
 if ischar(grd)
   grd_file = grd;

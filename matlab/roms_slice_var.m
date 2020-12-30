@@ -1,5 +1,4 @@
 function [data,z,lon,lat] = roms_slice_var(data,grd,index,ij,time)  
-% $Id: roms_slice_var.m 358 2008-04-07 14:15:03Z zhang $
 % Get an i or j direction slice of a roms variable 
 % 
 % Inputs:
@@ -14,6 +13,9 @@ function [data,z,lon,lat] = roms_slice_var(data,grd,index,ij,time)
 %
 % Usage:
 %    [data,z,lon,lat] = roms_slice_var(data,grd,index,ij,time)  
+%
+% Copyright (c) 2021 - John L. Wilkin - jwilkin@rutgers.edu
+% $Id$
 
 if length(size(data))==4
   data = squeeze(data(time,:,:,:));

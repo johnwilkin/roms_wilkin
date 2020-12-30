@@ -1,5 +1,4 @@
 function [data,x,y] = roms_zslice_var(data,time,depth,grd)
-% $Id: roms_zslice_var.m 477 2017-08-01 18:11:05Z wilkin $
 % Get a constant-z slice out of a 4-D ROMS variable 
 % [data,x,y] = roms_zslice_var(data,time,depth,grd)
 %
@@ -8,6 +7,9 @@ function [data,x,y] = roms_zslice_var(data,time,depth,grd)
 % input must be squeezed to dimensions  Z ETA_var XI_var
 %
 % John Wilkin
+%
+% Copyright (c) 2021 - John L. Wilkin - jwilkin@rutgers.edu
+% $Id: roms_zslice_var.m 477 2017-08-01 18:11:05Z wilkin $
 
 sizexy = fliplr(size(data));
 sizexy = fliplr(sizexy([1 2]));

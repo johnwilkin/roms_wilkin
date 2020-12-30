@@ -28,6 +28,8 @@ function [uout,vout,xout,yout] = roms_uvrhotate(u,v,grd,d)
 % the same way as the vector components. 
 %
 % John Wilkin - March 2010
+%
+% Copyright (c) 2021 - John L. Wilkin - jwilkin@rutgers.edu
 % $Id: roms_uvrhotate.m 550 2020-01-18 23:25:36Z robertson $
 
 if ~isstruct(grd)

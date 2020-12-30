@@ -67,7 +67,7 @@ function E = roms_get_era5_NCARds633_bulkflux(yyyy,mm,bbox,userpass)
 % John Wilkin - December 2020
 % jwilkin@rutgers.edu
 %
-% Copyright (c) 2020 John L. Wilkin 
+% Copyright (c) 2021 - John L. Wilkin - jwilkin@rutgers.edu
 % $Id: roms_get_era5_NCARds633_bulkflux.m 589 2020-12-28 21:50:00Z wilkin $
 
 % ERA5 analysis is username/password restricted

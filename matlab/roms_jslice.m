@@ -1,8 +1,6 @@
 function [data,z,lon,lat,t] = roms_jslice(file,var,time,jindex,grd)
 % [data,z,lon,lat,t] = roms_jslice(file,var,time,jindex,grd)
 % Get a constant-j slice out of a ROMS history, averages or restart file
-% 
-% $Id: roms_jslice.m 530 2019-05-15 19:35:53Z wilkin $
 %
 % Inputs
 %    file = his or avg nc file
@@ -19,10 +17,13 @@ function [data,z,lon,lat,t] = roms_jslice(file,var,time,jindex,grd)
 %    t = time in days for the data
 %
 % John Wilkin
-
+%
 % July 2016 (JLW) fixed bug in the padding/extrapolation to sea surface
 %           added padding/extrapolation to sea floor
-%           Replaced snctools calls with native netcdf
+%            Replaced snctools calls with native netcdf
+%
+% Copyright (c) 2021 - John L. Wilkin - jwilkin@rutgers.edu
+% $Id: roms_jslice.m 530 2019-05-15 19:35:53Z wilkin $
 
 % get the data
 % data = nc_varget(file,var,[time-1 0 jindex-1 0],[1 -1 1 -1]);

@@ -61,7 +61,7 @@ function [thedata,thegrid,han] = roms_sview(file,var,time,k,grd,vec_d,uscale,var
 %
 % John Wilkin jwilkin@rutgers.edu
 %
-% Copyright (c) 2020 John L. Wilkin 
+% Copyright (c) 2021 - John L. Wilkin - jwilkin@rutgers.edu
 % $Id: roms_sview.m 592 2020-12-28 21:56:28Z wilkin $
 %
 % See also ROMS_ZVIEW, ROMS_IVIEW, ROMS_JVIEW

@@ -31,7 +31,6 @@ function [xn,yn] = rk4(x,y,t,u,v,x0,y0,t0,tn,xmax,ymax);
 % HAVE SUBSTANTIAL ERRORS IN REGIONS Of STRONG FLOW CURVATURE.
 %
 % John Wilkin - 2006
-% $Id: rk4.m 544 2019-11-23 17:08:13Z robertson $
 
 x3d = x(:,:,ones([1 length(t)]));
 y3d = y(:,:,ones([1 length(t)]));

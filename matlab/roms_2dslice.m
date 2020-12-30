@@ -19,6 +19,9 @@ function [data,x,y,t,grd] = roms_2dslice(file,var,time,grd)
 %
 % converted to use snctools 2006-10-23
 % output t should now be a matlab datenum
+%
+% Copyright (c) 2021 - John L. Wilkin - jwilkin@rutgers.edu
+% $Id$
 
 if ~nc_isvar(file,var)
   error([ 'Variable ' var ' is not present in file ' file])

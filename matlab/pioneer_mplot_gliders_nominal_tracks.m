@@ -12,6 +12,8 @@ function [Hanglider,Hanlegend] = pioneer_mplot_gliders_nominal_tracks(leg)
 % adapted from diamondgliders.m from Pioneer Focus group COL April 2012 
 % John Wilkin 13 Aug 2015
 % converted for m_map Julia Levin
+%
+% Copyright (c) 2021 - John L. Wilkin - jwilkin@rutgers.edu
 % $Id: pioneer_mplot_gliders_nominal_tracks.m 573 2020-05-08 19:33:31Z wilkin $
 
 % get plot state

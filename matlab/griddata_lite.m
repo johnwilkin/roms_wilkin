@@ -22,7 +22,6 @@ function [xi,yi,zi] = griddata_lite(x,y,z,xi,yi,method,options)
 %
 %    clear global TRI (be sure to include option global)
 %
-%
 % See help griddata for more info on the method
 %
 % John Wilkin, October 2002
@@ -75,7 +74,7 @@ function [xi,yi,zi] = griddata_lite(x,y,z,xi,yi,method,options)
 %      mesh(xi,yi,zi), hold on, plot3(x,y,z,'o'), hold off
 %
 %   See also GRIDDATA3, GRIDDATAN, DELAUNAY, INTERP2, MESHGRID, DELAUNAYN.
-
+%
 %   Copyright 1984-2007 The MathWorks, Inc. 
 %   $Revision: 5.33.4.9 $  $Date: 2008/06/20 08:00:53 $
 

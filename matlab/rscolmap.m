@@ -1,5 +1,4 @@
 function map = rscolmap(m)
-% $Id: rscolmap.m 358 2008-04-07 14:15:03Z zhang $
 %RSCOLMAP   CSIRO Marine Labs Remote Sensing group standard colormap for SST
 %   RSCOLMAP(M) is the colormap used by CSIRO Marine Research Remote Sensing 
 %   group for SST images
@@ -7,7 +6,7 @@ function map = rscolmap(m)
 % See also redblue, pixcmap, phasemap, clmap rscolmap, zebra, cmap5,
 % makecmap, coolavhrrmap
 %
-% John Wilkin
+% John Wilkin - 1998
 
 map = [...
   0   0 123

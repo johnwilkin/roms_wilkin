@@ -1,11 +1,13 @@
 function h = roms_plot_coast(g,c)
-% $Id: roms_plot_coast.m 476 2017-08-01 18:10:12Z wilkin $
 % han = roms_plot_coast(grd,color)
 %
 % Plot coastline over an existing plot
 % assuming lon_coast and lat_coast are in the GRD structure or file
 % Will work for any structure with lon_coast,lat_coast, e.g.
 %       roms_plot_coast(coastline_ec,color)
+%
+% Copyright (c) 2021 - John L. Wilkin - jwilkin@rutgers.edu
+% $Id: roms_plot_coast.m 476 2017-08-01 18:10:12Z wilkin $
 
 % get plot state
 nextplotstatewas = get(gca,'nextplot');

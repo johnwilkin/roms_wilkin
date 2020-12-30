@@ -12,7 +12,7 @@ function g = roms_get_ijgrid(g)
 %
 % John Wilkin - December 2016
 %
-% Copyright (c) 2020 - John L. Wilkin - jwilkin@rutgers.edu
+% Copyright (c) 2021 - John L. Wilkin - jwilkin@rutgers.edu
 % $Id: roms_get_ijgrid.m 596 2020-12-29 16:46:14Z wilkin $
 
 [nj,ni] = size(g.lon_rho);

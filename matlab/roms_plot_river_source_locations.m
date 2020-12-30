@@ -26,7 +26,7 @@ function [han,lon,lat] = roms_plot_river_source_locations(file,g,color)
 %              Updated August 2016 to give more detail
 %              Updated May 2020 to plot LwSrc sources.
 %
-% Copyright (c) 2020 - John L. Wilkin - jwilkin@rutgers.edu
+% Copyright (c) 2021 - John L. Wilkin - jwilkin@rutgers.edu
 % $Id: roms_plot_river_source_locations.m 595 2020-12-28 22:03:45Z wilkin $
 %
 % See also roms_get_river_source_locations.m

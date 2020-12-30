@@ -7,6 +7,9 @@ function thegrid = roms_nget_grid(fnames,snames)
 % If scoordfilelist is not given the z-coordinates will not be computed
 %
 % John Wilkin - May 2018
+%
+% Copyright (c) 2021 - John L. Wilkin - jwilkin@rutgers.edu
+% $Id$
 
 get_z_coords = true;
 if nargin < 2

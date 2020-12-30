@@ -12,7 +12,7 @@ function B = catstruct(dim,sa,sb)
 %
 % John Wilkin - June 2019
 %
-% Copyright (c) 2020 - John L. WIlkin - jwilkin@rutgers.edu
+% Copyright (c) 2020 - John L. Wilkin - jwilkin@rutgers.edu
 % $Id: catstruct.m 599 2020-12-29 16:53:00Z wilkin $
 
 na = fieldnames(sa);

@@ -16,6 +16,8 @@ function [thedata,thegrid,thehan] = roms_nzview(file,var,ntime,z,grd,nvec_d,usca
 % If VEC_D is a scalar that decimation ratio is used in all grids
 %
 % John Wilkin - October 2016
+%
+% Copyright (c) 2021 - John L. Wilkin - jwilkin@rutgers.edu
 % $Id: roms_nzview.m 533 2019-09-13 13:41:54Z wilkin $
 
 if iscell(file)

@@ -1,11 +1,13 @@
 function pos = roms_cgridpos(s,grd)
-% $Id: roms_cgridpos.m 440 2016-02-18 20:34:17Z wilkin $
 % function pos = roms_cgridpos(s,grd)
 %
 % From the size of a variable determine whether it is defined on the
 % u, v, rho or psi location on the ROMS Arakawa-C grid
 % 
 % John Wilkin
+%
+% Copyright (c) 2021 - John L. Wilkin - jwilkin@rutgers.edu
+% $Id: roms_cgridpos.m 440 2016-02-18 20:34:17Z wilkin $
 
 if ndims(s)~=2
   s = size(s);

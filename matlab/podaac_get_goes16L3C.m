@@ -41,13 +41,15 @@ function [data,geo,info] = podaac_get_goes16L3C(dnum,bbox)
 %   INFO gives aspects of the documentation of this dataset.
 %
 % John Wilkin - June 2020
-% $Id: podaac_get_goes16L3C.m 586 2020-10-12 20:21:53Z wilkin $
 %
 % EXAMPLE USAGE: 
 %
 % bbox = [-80.46 -59.75 32.28 46.57];
 % dnum = datenum(2020,7,1)+[0 1];
 % [data,geo,info] = podaac_get_goes16L3C(dnum,bbox);
+%
+% Copyright (c) 2021 - John L. Wilkin - jwilkin@rutgers.edu
+% $Id: podaac_get_goes16L3C.m 586 2020-10-12 20:21:53Z wilkin $
 
 dataurl = fullfile('https://thredds.jpl.nasa.gov/thredds/dodsC',...
   'OceanTemperature/ABI_G16-STAR-L3C-v2.70.nc');

@@ -17,6 +17,8 @@ function [Var4D,Coord4D] = ...
 %     if < 0 treat as a z depth (meters) below sea surface
 %
 % John Wilkin - May 2019
+%
+% Copyright (c) 2021 - John L. Wilkin - jwilkin@rutgers.edu
 % $Id: roms_zgenslice.m 580 2020-09-08 17:17:33Z wilkin $
 
 if length(zTrk)==1

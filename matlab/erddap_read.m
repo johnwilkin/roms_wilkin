@@ -12,6 +12,8 @@ function [DATA,url] = erddap_read(url)
 % function does if the query at first throws an error.
 %
 % John Wilkin - August 2018
+%
+% Copyright (c) 2021 - John L. Wilkin - jwilkin@rutgers.edu
 % $Id: erddap_read.m 549 2020-01-18 23:24:44Z robertson $
 
 % Download to temporary file
