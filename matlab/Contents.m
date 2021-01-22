@@ -71,10 +71,13 @@ echo on
 % roms_rossbyradius.m     - compute baroclinic Rossby radius (slow)
 % roms_lonlat2ij.m        - what it says
 % roms_zint.m             - vertical integral between user defined layers         
+% roms_vorticity          - used in roms_*view to plot vorticity and okubo-weiss 
+% roms_co2sys_var         - used in roms_*view to plot omaga from alk and tic
 %
 % Other useful functions
 %
 % pcolorjw.m         - venerable function to plot centered pcolor patches
+% nc_varget          - subverts call to snctools nc_varget and uses native ncread
 % amerc.m            - simple minded aspect ratio for lon/lat plots 
 % callsfindstr.m     - reveal the path of all functions called 
 % catstruct.m        - concatentate alike structures
