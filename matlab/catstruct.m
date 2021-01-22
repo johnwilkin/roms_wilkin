@@ -19,9 +19,9 @@ na = fieldnames(sa);
 
 for name = na'
   try
-    sa.(char(name)) = cat(dim,sa.(char(name)),sb.(char(name)));
+    B.(char(name)) = cat(dim,sa.(char(name)),sb.(char(name)));
   catch
-    warning(['Unable to cat field ' name])
+    warning(['Unable to cat field ' char(name)])
   end
 end
-B = sa;
+
