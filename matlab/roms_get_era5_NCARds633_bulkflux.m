@@ -4,7 +4,7 @@ function E = roms_get_era5_NCARds633_bulkflux(yyyy,mm,bbox,userpass)
 % Read ECMWF ERA5 meteorological reanalysis from the NCAR Research Data 
 % Archive (RDA) dataset ds633.0 https://rda.ucar.edu/datasets/ds633.0
 %
-% Use this function to extract the data for a chosen month, then use 
+% Use this function to extract data for a chosen month, then use 
 % roms_write_era5_NCARds633_frcfile to create and write the ROMS format 
 % surface forcing netcdf file. 
 %
@@ -39,8 +39,8 @@ function E = roms_get_era5_NCARds633_bulkflux(yyyy,mm,bbox,userpass)
 %     This string augments the OPeNDAP data URL thus:
 %     url = 'https://username:password@rda.ucar.edu/thredds/dodsC/...
 %                    ^^^^^^^^^^^^^^^^^
-%     and therfore if your username or password includes text that would be
-%     interpretted by the http protocol it must be URL encoded. In
+%     and therefore if your username or password includes text that would 
+%     be interpretted by the http protocol it must be URL encoded. In
 %     particular, since it is common practise to use an email address as
 %     RDA username, the @ must be encoded as %40, e.g. my username and 
 %     password would be entered as 

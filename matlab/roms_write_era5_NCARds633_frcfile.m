@@ -2,7 +2,7 @@
 % from NCAR dataset ds633.0 using roms_get_era5_ncar_ds633.m, i.e. ...
 %
 % First run e.g. E = roms_get_era5_ncar_ds633(year,month,bounding_box...)
-% and then run this script to create the forcimng netcdf file.
+% and then run this script to create the forcing netcdf file.
 %
 % See the help on roms_get_era5_ncar_ds633 regarding obtaining login
 % credentials to access the ERA5 archive at NCAR Research Data Archive.
@@ -26,7 +26,7 @@
 % USER SETS PARAMETERS IN THIS BLOCK
 
 % shift time to the ROMS basedate you want to use
-Time0 = datenum(2011,1,1);
+Time0 = datenum(2018,5,1);
 time = E.time.data - Time0;
 Tname = 'time'; % need to reset some parameters from roms_metadata
 
@@ -35,8 +35,10 @@ YYYY = upper(int2str(E.yyyy));
 MM = upper(sprintf('%02d',E.mm));
 
 % Set the output file name prefix
-ncname = strcat('frc_watl_ERA5_bulkflux_',YYYY,MM,'.nc');
-titlestr = 'ERA-5 meteorology forcing (from NCAR ds633.0) for WATL grid ';
+ROMS_APP = 'MYAPPLICATION'; % for example
+ncname = strcat('frc_',ROMS_APP,'_ERA5_bulkflux_',YYYY,MM,'.nc');
+titlestr = strcat('ERA-5 meteorology forcing (from NCAR ds633.0) for ',...
+  ROMS_APP);
 citation = E.citation;
 
 spherical = true;
