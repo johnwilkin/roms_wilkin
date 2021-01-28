@@ -237,6 +237,7 @@ switch var
     tic = nc_varget(file,'TIC',START,COUNT);
     press = -grd.z_r(k,:,:);
     data = roms_co2sys_var(var,temp,salt,alk,tic,press); 
+    data = squeeze(data);
   otherwise
     data = squeeze(nc_varget(file,var,START,COUNT));
     try
