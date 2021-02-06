@@ -35,14 +35,14 @@ function E = roms_get_era5_NCARds633_bulkflux(yyyy,mm,bbox,userpass)
 %
 %   bbox - A 4-element vector in the format of Matlab axis defining the
 %      lon/lat bounding box region to subset with the OPeNDAP query
-%      e.g. bbox = [-110 -30 0 55] for West Atlantic Model. 
+%      e.g. bbox = [-110 -30 0 55] or [250 330 0 55] for West Atlantic.
 %      NOTE: The longitude coordinate in ERA5 breaks at the prime meridian. 
-%      This function detects whether in input longitudes in BBOX are 
+%      This function detects whether in the input longitudes in BBOX are 
 %      negative (west of prime meridian) or positive (east of prime 
-%      and adjusts accordingly. But the query cannot stradle the prime 
-%      meridian. The user will have to make two files and merge them. If I
-%      ever have a project in the east Atlantic I might code this merger
-%      automatically, until then you are on your own.
+%      and adjusts accordingly, but the query cannot stradle the prime 
+%      meridian. For such a case the user has to make two files and merge 
+%      them. If I ever have a project in the east Atlantic I might code 
+%      this merger automatically, but until then you are on your own.
 %
 %   userpass (string) - RDA authentication in the format:
 %     'username:password' (notice the colon between username and password)
@@ -294,19 +294,17 @@ for vname = ecmwf_bulkflux_vars
   
   url = files(1).url;
   
-  lon = ncread(url,'longitude')-360;
+  % assume user is requesting longitudes west of the prime meridian given
+  % as negative values
+  if all(bbox(1:2)<0)
+    lon = ncread(url,'longitude')-360;
+  elseif all(bbox(1:2)>0)
+    lon = ncread(url,'longitude');
+  else
+    error('Requested longitude range straddles the prime meridian')
+  end
   Is = find(lon>=bbox(1),1,'first');
   Ie = find(lon<=bbox(2),1,'last');
-  if isempty(Is) || isempty(Ie)
-    disp('No longitudes -360 to 0 found in bounding box limits')
-    warning('Adding 360 to longitude coordinate and trying again')
-    lon = lon+360;
-    Is = find(lon>=bbox(1),1,'first');
-    Ie = find(lon<=bbox(2),1,'last');
-    if isempty(Is) || isempty(Ie)
-      error('Failed to find longitude points in bounding box limits')
-    end
-  end
   Ilen = Ie-Is;
   
   lat = ncread(url,'latitude');
