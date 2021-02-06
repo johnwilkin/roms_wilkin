@@ -79,7 +79,7 @@ if jindex<0
   jindex = abs(jindex);
 end
 
-[data,z,lon,lat] = roms_jslice(file,var,time,jindex,grd);
+[data,z,lon,lat,t] = roms_jslice(file,var,time,jindex,grd);
 data = double(data);
 
 global logdata log_chl
@@ -133,16 +133,23 @@ if log_chl
 end
 
 % time information
-dateformat = 1;
-try
-  [dnum,dstr] = roms_get_date(file,time,dateformat);
-  tstr = [' - Date ' dstr];
-  % tunits = nc_attget(file,'ocean_time','units');
-  % tstr = [' - Date ' datestr(t+datenum(parsetnc(tunits)),dateformat) ];
-catch
+dateformat = 0;
+if isfinite(t)
+  tstr = [' - Date ' datestr(t,dateformat)];
+else
   warning([ 'Problem parsing date from file ' file ' for time index ' time])
   tstr = [];
 end
+% dateformat = 1;
+% try
+%   [dnum,dstr] = roms_get_date(file,time,dateformat);
+%   tstr = [' - Date ' dstr];
+%   % tunits = nc_attget(file,'ocean_time','units');
+%   % tstr = [' - Date ' datestr(t+datenum(parsetnc(tunits)),dateformat) ];
+% catch
+%   warning([ 'Problem parsing date from file ' file ' for time index ' time])
+%   tstr = [];
+% end
 
 titlestr = ...
     {['file: ' strrep_(file) ],...

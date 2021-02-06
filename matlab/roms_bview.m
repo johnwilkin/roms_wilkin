@@ -23,8 +23,8 @@ if nargin < 6
   xcoord = 'dist';
 end
 
-if iscell(var) % case function is called in a cell list loop of varnames
-  var = char(var);
+if iscell(varname) % in case called in a cell list loop of varnames
+  varname = char(varname);
 end
 
 if isempty(grd)
@@ -147,7 +147,7 @@ switch xcoord
 end
 
 if nargout > 0
-  Data.var = data;
+  Data.data = data;
   Data.lon = lon;
   Data.lat = lat;
   Data.dist = dist;

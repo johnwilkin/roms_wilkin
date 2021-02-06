@@ -12,12 +12,12 @@ function E = roms_get_era5_NCARds633_bulkflux(yyyy,mm,bbox,userpass)
 % file for the BULK_FLUX option, i.e. marine boundary layer pressure, 2-m 
 % air temperature, 2-m dew point (for conversion to relative humidity), 
 % 10-m winds, net shortwave radiation, and both net longwave and downward 
-% longwave radiation from which ROMS selects depending on whether 
-% LONGWAVE_OUT is defined.
+% longwave radiation from which ROMS selects depending on whether the ROMS
+% user has #define LONGWAVE_OUT or not.
 %
-% ERA5 data are freely available but you must be registered as a user at
+% ERA5 data are freely available but you must be a registered user at
 % rda.ucar.edu to obtain access. See the "Register Now" link at the top 
-% left of https://rda.ucar.edu to obtain a logi). 
+% left of https://rda.ucar.edu to obtain a login). 
 %
 % Login credentials must be passed to this function as the input USERPASS.
 % If they not given as an input, the function attempts to parse the 
@@ -30,10 +30,20 @@ function E = roms_get_era5_NCARds633_bulkflux(yyyy,mm,bbox,userpass)
 % Inputs:
 %
 %   yyyy (scalar) - the year number
+%
 %   mm (scalar) - the month number
-%   bbox (4-element vector in the format of Matlab axis) - lon/lat bounding
-%      box defining the region to subset to with the OPeNDAP query
-%      e.g. bbox = [-110 -30 0 55] for West Atlantic Model 
+%
+%   bbox - A 4-element vector in the format of Matlab axis defining the
+%      lon/lat bounding box region to subset with the OPeNDAP query
+%      e.g. bbox = [-110 -30 0 55] for West Atlantic Model. 
+%      NOTE: The longitude coordinate in ERA5 breaks at the prime meridian. 
+%      This function detects whether in input longitudes in BBOX are 
+%      negative (west of prime meridian) or positive (east of prime 
+%      and adjusts accordingly. But the query cannot stradle the prime 
+%      meridian. The user will have to make two files and merge them. If I
+%      ever have a project in the east Atlantic I might code this merger
+%      automatically, until then you are on your own.
+%
 %   userpass (string) - RDA authentication in the format:
 %     'username:password' (notice the colon between username and password)
 %     This string augments the OPeNDAP data URL thus:
@@ -65,10 +75,14 @@ function E = roms_get_era5_NCARds633_bulkflux(yyyy,mm,bbox,userpass)
 %   that your Matlab is using with: >> libvers = netcdf.inqLibVers
 %    
 % John Wilkin - December 2020
-% jwilkin@rutgers.edu
 %
 % Copyright (c) 2021 - John L. Wilkin - jwilkin@rutgers.edu
 % $Id: roms_get_era5_NCARds633_bulkflux.m 589 2020-12-28 21:50:00Z wilkin $
+%
+% Obtain an up-to-date version of this code from 
+% https://github.com/johnwilkin/roms_wilkin
+%
+% See also roms_write_era5_NCARds633_frcfile
 
 % ERA5 analysis is username/password restricted
 if nargin < 4
@@ -279,12 +293,23 @@ for vname = ecmwf_bulkflux_vars
   % read spatial coordinates subset
   
   url = files(1).url;
-  lon = ncread(url,'longitude')-360;
-  lat = ncread(url,'latitude');
   
+  lon = ncread(url,'longitude')-360;
   Is = find(lon>=bbox(1),1,'first');
   Ie = find(lon<=bbox(2),1,'last');
+  if isempty(Is) || isempty(Ie)
+    disp('No longitudes -360 to 0 found in bounding box limits')
+    warning('Adding 360 to longitude coordinate and trying again')
+    lon = lon+360;
+    Is = find(lon>=bbox(1),1,'first');
+    Ie = find(lon<=bbox(2),1,'last');
+    if isempty(Is) || isempty(Ie)
+      error('Failed to find longitude points in bounding box limits')
+    end
+  end
   Ilen = Ie-Is;
+  
+  lat = ncread(url,'latitude');
   Js = find(lat<=bbox(4),1,'first');
   Je = find(lat>=bbox(3),1,'last');
   Jlen = Je-Js;

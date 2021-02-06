@@ -51,7 +51,8 @@ data = squeeze(data);
 Vinfo = ncinfo(file,var);
 time_variable = Vinfo.Dimensions(end).Name;
 % t = nc_varget(file,time_variable,time-1,1);
-t = ncread(file,time_variable,time,1);
+% t = ncread(file,time_variable,time,1);
+t = roms_get_time(file,time_variable,time);
 
 % determine where on the C-grid these values lie
 try

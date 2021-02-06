@@ -4,7 +4,7 @@ function [Data,hax] = roms_bviews(file,varname,time,blist,grd)
 % Like roms_bview but stitches together several boundaries given in the
 % boundary list BLIST in the order given using a set of axes adjacent to
 % each other. (This could be modified to concatenate the data into a single
-% plot view). 
+% plot view).
 %
 % Inputs:
 %   file   = roms his/avg/rst etc nc file
@@ -75,13 +75,10 @@ for k=1:nax
   
 end
 
-hax(2).YTick = [];
-hax(3).YTick = [];
+for k=2:length(hax)
+  hax(k).YTick = [];
+end
 linkprop(hax,'YLim');
 ylim([ymin ymax])
 linkprop(hax,'CLim');
-
-
-
-
 

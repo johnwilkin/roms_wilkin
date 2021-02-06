@@ -1,3 +1,5 @@
+% Script roms_write_era5_NCARds633_frcfile.m
+%
 % Create a ROMS meteorology forcing file from ERA5 reanalysis extracted
 % from NCAR dataset ds633.0 using roms_get_era5_ncar_ds633.m, i.e. ...
 %
@@ -14,12 +16,17 @@
 % title and any other pertinent metadata.
 %
 % This script uses routines from the myroms.org Matlab tools
-% (roms_metadata, nc_create, nc_write, etc.).
+% (roms_metadata, nc_create, nc_write, nc_constant etc.).
 %
 % John Wilkin - December 2020
 %
 % Copyright (c) - 2021 John L. Wilkin - jwilkin@rutgers.edu
 % $Id: roms_write_era5_NCARds633_frcfile.m 600 2020-12-29 19:19:51Z wilkin $
+%
+% Obtain an up-to-date version of this code from 
+% https://github.com/johnwilkin/roms_wilkin
+%
+% See also roms_get_era5_NCARds633_bulkflux
 
 %% ------------------------------------------------------------------------
 
