@@ -23,7 +23,10 @@ function [thedata,thegrid,han] = roms_zview(file,var,time,depth,grd,vec_d,uscale
 %            'ow' plot Okubo-Weiss parameter
 %            'wind' plot the magnitude of vector (Uwind,Vwind) as from a
 %               forcing file; both components must be in the same file 
-%               and on the ROMS rho-points grid (no regrid option)  
+%               and on the ROMS rho-points grid (no regrid option) 
+%            'omegaca','omegaar','ph','phtotal' use CO2SYS to compute
+%            constituents of the ocean carbon state - alkalinity, TIC must
+%            be present in the ROMS file from the Fennel/BGC model
 %
 % time  = time index into nc FILE
 %      or date/time string (in DATESTR format 0) 'dd-mmm-yyyy HH:MM:SS'
@@ -70,6 +73,9 @@ function [thedata,thegrid,han] = roms_zview(file,var,time,depth,grd,vec_d,uscale
 %
 % Copyright (c) 2021 - John L. Wilkin - jwilkin@rutgers.edu
 % $Id: roms_zview.m 592 2020-12-28 21:56:28Z wilkin $
+%
+% Obtain an up-to-date version of this code from 
+% https://github.com/johnwilkin/roms_wilkin
 %
 % See also ROMS_SVIEW, ROMS_IVIEW, ROMS_JVIEW
 
@@ -165,7 +171,7 @@ switch var
     datav = roms_zslice(file,'v',time,depth,grd);
     data = roms_vorticity(datau,datav,grd,'okubo-weiss');
     depstr = [' - Depth ' num2str(abs(depth)) ' m '];
-  case {'omegaca','omegaar','ph','pphotal'}
+  case {'omegaca','omegaar','ph','phtotal'}
     temp = roms_zslice(file,'temp',time,depth,grd);
     salt = roms_zslice(file,'salt',time,depth,grd);
     alk = roms_zslice(file,'alkalinity',time,depth,grd);

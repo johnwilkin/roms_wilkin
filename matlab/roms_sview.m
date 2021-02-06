@@ -24,6 +24,9 @@ function [thedata,thegrid,han] = roms_sview(file,var,time,k,grd,vec_d,uscale,var
 %            'wind' plot the magnitude of vector (Uwind,Vwind) as from a
 %               forcing file; both components must be in the same file 
 %               and on the ROMS rho-points grid (no regrid option)  
+%            'omegaca','omegaar','ph','phtotal' use CO2SYS to compute
+%            constituents of the ocean carbon state - alkalinity, TIC must
+%            be present in the ROMS file from the Fennel/BGC model
 %
 % time  = time index into nc FILE
 %      or date/time string (in DATESTR format 0) 'dd-mmm-yyyy HH:MM:SS'
@@ -140,7 +143,7 @@ switch var
     vartest = 'Uwind';
   case {'umag','rvor','ow'}
     vartest = 'u';
-  case {'omegaca','omegaar','ph','pphotal'}
+  case {'omegaca','omegaar','ph','phtotal'}
     vartest = 'salt';
   otherwise
     vartest = var;
@@ -230,7 +233,7 @@ switch var
     datav = squeeze(nc_varget(file,'v',START,COUNT));
     % datav(isnan(datav)) = 0;
     data = roms_vorticity(datau,datav,grd,'okubo-weiss');
-  case {'omegaca','omegaar','ph','pphotal'} 
+  case {'omegaca','omegaar','ph','phtotal'} 
     temp = nc_varget(file,'temp',START,COUNT);
     salt = nc_varget(file,'salt',START,COUNT);
     alk = nc_varget(file,'alkalinity',START,COUNT);
