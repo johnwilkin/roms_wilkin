@@ -180,9 +180,10 @@ for v = vlist
   % Add the ROMS variables to the forcing file
   S.Variables(5) = roms_metadata(Vroms, spherical, nctype, Unlimited);
   S.Variables(5).Dimensions(3).Name = 'time';
-  S.Variables(5).Attributes(3).Value = 'time';
-  iattc = findstrinstruct(S.Variables(5).Attributes,'Name','coordinates');
-  S.Variables(5).Attributes(iattc).Value = 'lon lat time';
+  iattT = findstrinstruct(S.Variables(5).Attributes,'Name','time');
+  S.Variables(5).Attributes(iattT).Value = 'time';
+  iattC = findstrinstruct(S.Variables(5).Attributes,'Name','coordinates');
+  S.Variables(5).Attributes(iattC).Value = 'lon lat time';
   
   % Prepare to update some long names to be more descriptive of ERA5
   ilongname = findstrinstruct(S.Variables(5).Attributes,'Name','long_name');
