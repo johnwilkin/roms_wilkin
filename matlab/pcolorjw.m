@@ -14,6 +14,8 @@ function [h,xx,yy] = pcolorjw(x,y,c)
 %       of all the others as can be seen if one sets shading('faceted')
 %
 %       John Wilkin 7-May-93
+%       Now part of https://github.com/johnwilkin/roms_wilkin
+%
 %   
 %PCOLOR Pseudocolor (checkerboard) plot.
 %       PCOLOR(C) is a pseudocolor plot of matrix C.  The screen is broken
