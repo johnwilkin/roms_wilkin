@@ -31,6 +31,9 @@ function [uout,vout,xout,yout] = roms_uvrhotate(u,v,grd,d)
 %
 % Copyright (c) 2021 - John L. Wilkin - jwilkin@rutgers.edu
 % $Id: roms_uvrhotate.m 550 2020-01-18 23:25:36Z robertson $
+%
+% Obtain an up-to-date version of this code from 
+% https://github.com/johnwilkin/roms_wilkin
 
 if ~isstruct(grd)
   % assume filename was given for grd
