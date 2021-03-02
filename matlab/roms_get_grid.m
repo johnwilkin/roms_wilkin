@@ -134,7 +134,8 @@ else
       catch
         % some files dont have psi coordinates
       end
-      grd.nolatlon = 1;
+      grd.nolatlon = true;
+      grd.merc = false;
     end
   end
   try
