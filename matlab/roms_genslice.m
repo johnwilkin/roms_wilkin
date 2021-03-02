@@ -392,15 +392,22 @@ pm = ncread(file,'pm')';
 pn = ncread(file,'pn')';
 lonr = ncread(file,'lon_rho')';
 latr = ncread(file,'lat_rho')';
-angle = ncread(file,'angle')';
+try
+  angle = ncread(file,'angle')';
+  gotangle = true;
+catch
+  gotangle = false;
+end
 
 % Can't use F from above because that might be for u or v
 F = scatteredInterpolant(lonr(:),latr(:),pm(:),method);
 pm = F(lonTrk,latTrk);
 F = scatteredInterpolant(lonr(:),latr(:),pn(:),method);
 pn = F(lonTrk,latTrk);
-F = scatteredInterpolant(lonr(:),latr(:),angle(:),method);
-angle = F(lonTrk,latTrk);
+if gotangle
+  F = scatteredInterpolant(lonr(:),latr(:),angle(:),method);
+  angle = F(lonTrk,latTrk);
+end
 
 % 1/m dI/ds and 1/n dJ/ds
 % These define the unit vector parallel and perpendicular to the track in
@@ -747,7 +754,9 @@ Coord.h   = Th;
 Coord.zeta = Ts;
 Coord.en    = en;
 Coord.ep     = ep;
-Coord.angle    = angle;
+if gotangle
+  Coord.angle    = angle;
+end
 Coord.lonTrk = lonTrk(:)';
 Coord.latTrk  = latTrk(:)';
 Coord.timTrk   = timTrk(:)';

@@ -271,7 +271,7 @@ end
 hanpc = pcolorjw(x,y,data.*mask);
 caxis(cax)
 if isfield(grd,'nolatlon')
-  if grd.nolatlon ~= 1
+  if ~grd.nolatlon
     xtickformat('degrees');
     ytickformat('degrees');
   end
@@ -339,13 +339,14 @@ if nargin > 5
 end
 
 % change plotaspectratio to be approximately Mercator
-% if you don't like this, add variable nolatlon (=1) to the grd structure
+% if you don't like this, add variable merc = false to the grd structure
 % to disable this
-if isfield(grd,'nolatlon')
-  if grd.nolatlon ~= 1
+if isfield(grd,'merc')
+  if grd.merc 
     set(gca,'DataAspectRatio',[1 cos(mean(ylim)*pi/180) 1]);
   end
 else
+  % default is to assume lon/lat axes and scale them to be mercator-like
   set(gca,'DataAspectRatio',[1 cos(mean(ylim)*pi/180) 1]);
 end
 
