@@ -49,12 +49,16 @@ function E = roms_get_era5_NCARds633_bulkflux(yyyy,mm,bbox,userpass)
 %     This string augments the OPeNDAP data URL thus:
 %     url = 'https://username:password@rda.ucar.edu/thredds/dodsC/...
 %                    ^^^^^^^^^^^^^^^^^
-%     and therefore if your username or password includes text that would 
-%     be interpretted by the http protocol it must be URL encoded. In
-%     particular, since it is common practise to use an email address as
-%     RDA username, the @ must be encoded as %40, e.g. my username and 
-%     password would be entered as 
+%     If your username or password includes text that would be interpretted
+%     by the http protocol it must be URL encoded. In particular, since it 
+%     is common practise to use an email address as RDA username, the @ 
+%     must be encoded as %40, e.g. my username and password would be 
 %     userpass = 'jwilkin%40rutgers.edu:mypassword' (not my real password!)
+%     If you need help on this conversion, go to:
+%     https://www.w3schools.com/tags/ref_urlencode.ASP
+%     and enter your username or password string to find out how to URL 
+%     encode them to build the username:password string. DON'T URL encode
+%     the colon - that will throw an error
 %
 % Outputs:
 %

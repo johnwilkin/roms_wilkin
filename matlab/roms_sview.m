@@ -10,23 +10,7 @@ function [thedata,thegrid,han] = roms_sview(file,var,time,k,grd,vec_d,uscale,var
 %       (2) if isstruct(var) then
 %            var.name is the variable name
 %            var.cax  is the color axis range
-%       (3) special variables not actually in the file
-%            'Chlorophyll' with a captial C plots chlorophyll log
-%              transformed before pcolor
-%            'ubarmag' or 'vbarmag' plots velocity magnitude computed
-%              from vector (ubar,vbar)
-%            'umag' or 'vmag' plots velocity magnitude computed
-%              from vector (u,v)
-%            'stress' or 'bstress' plot the magnitude of the surface or
-%               bottom stress, respectively
-%            'rvor' plot relative velocity
-%            'ow' plot Okubo-Weiss parameter
-%            'wind' plot the magnitude of vector (Uwind,Vwind) as from a
-%               forcing file; both components must be in the same file 
-%               and on the ROMS rho-points grid (no regrid option)  
-%            'omegaca','omegaar','ph','phtotal' use CO2SYS to compute
-%            constituents of the ocean carbon state - alkalinity, TIC must
-%            be present in the ROMS file from the Fennel/BGC model
+%     See notes below about special variables not in the file
 %
 % time  = time index into nc FILE
 %      or date/time string (in DATESTR format 0) 'dd-mmm-yyyy HH:MM:SS'
@@ -47,14 +31,36 @@ function [thedata,thegrid,han] = roms_sview(file,var,time,k,grd,vec_d,uscale,var
 % uscale = vector length scale
 %       if uscale < 0 then pseudo particle tracks are plotted instead of 
 %       quiver velocity vectors, and abs(uscale) is intepretted as the 
-%       duration in days of the track length. See roms_curquivergrd.m
+%       duration in days of the track length. See roms_curquivergrd.
+%       This can be very slow on a large grid. If you have zoomed in the
+%       view it will be faster to add curved vectors separately with
+%       function roms_addvect.
 %
 % varargin are additional arguments passed on to roms_quivergrd or 
 %       roms_curquivergrd to format the plot
 %
-% If this preference is set to true, and wet/dry masks are present in the
-% output, then they will be applied to the plot:
+% If wet/dry masks are present in the output file, then they will be 
+% applied to the plot if this preference is set:
 %      setpref('ROMS_WILKIN','USE_WETDRY_MASK',true);
+%
+% Requesting plots of special variables not actually in the file
+%       varname = ...
+%            'Chlorophyll' with a captial C plots chlorophyll log
+%              transformed before pcolor
+%            'ubarmag' or 'vbarmag' plots velocity magnitude computed
+%              from vector (ubar,vbar)
+%            'umag' or 'vmag' plots velocity magnitude computed
+%              from vector (u,v)
+%            'stress' or 'bstress' plot the magnitude of the surface or
+%               bottom stress, respectively
+%            'rvor' plot relative velocity
+%            'ow' plot Okubo-Weiss parameter
+%            'wind' plot the magnitude of vector (Uwind,Vwind) as from a
+%               forcing file; both components must be in the same file 
+%               and on the ROMS rho-points grid (no regrid option) 
+%            'omegaca','omegaar','ph','phtotal' use CO2SYS to compute
+%            constituents of the ocean carbon state - alkalinity, TIC must
+%            be present in the ROMS file from the Fennel/BGC model
 %
 % Outputs:
 % 
@@ -397,7 +403,7 @@ if nargin > 5
       lon0(isnan(dmask)) = [];
       lat0(isnan(dmask)) = [];
       [hanquiver,curdata] = ...
-        roms_curquivergrd(u,v,grd,lon0(:),lat0(:),-uscale,20,varargin{:});
+        roms_curquivergrd(u,v,grd,lon0(:),lat0(:),-uscale,10,varargin{:});
     end
   end
 end

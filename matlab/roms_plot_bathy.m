@@ -1,4 +1,4 @@
-function han = roms_plot_bathy(grd,cmap,clev,var);
+function hanout = roms_plot_bathy(grd,cmap,clev,var)
 % han = roms_plot_bathy(grd,cmap,clev,var);
 % 
 % defaults:
@@ -40,12 +40,12 @@ end
 
 switch var
   case 'h'
-    pcolorjw(grd.lon_rho,grd.lat_rho,grd.h.*grd.mask_rho_nan)
+    hanp = pcolorjw(grd.lon_rho,grd.lat_rho,grd.h.*grd.mask_rho_nan);
   case 'r'
-    pcolorjw(grd.lon_rho,grd.lat_rho,rvalue(grd.h).*grd.mask_rho_nan)
+    hanp = pcolorjw(grd.lon_rho,grd.lat_rho,rvalue(grd.h).*grd.mask_rho_nan);
   case 'cfl'
     cfl = min(1./(grd.pm),1./grd.pn)./sqrt(9.81*grd.h);
-    pcolorjw(grd.lon_rho,grd.lat_rho,cfl.*grd.mask_rho_nan)
+    hanp = pcolorjw(grd.lon_rho,grd.lat_rho,cfl.*grd.mask_rho_nan);
     [worst,where] = sort(cfl(:));
     disp(num2str(worst(1)))
     ncheck = 30;
@@ -56,19 +56,21 @@ switch var
     [grd.lon_rho(where) grd.lat_rho(where) grd.h(where) cfl(where)]
     hold off
 end
-if isstr(clev)
+han.pcolor = hanp;
+
+if numel(clev)==2
   caxis(clev)
 else
   caxis([min(clev) max(clev)])
   if length(clev) > 2
     hold on
-    [cs,hanc] = contour(grd.lon_rho,grd.lat_rho,grd.h.*grd.mask_rho_nan,clev);
-    set(hanc,'edgecolor','k')
+    [~,hanc] = contour(grd.lon_rho,grd.lat_rho,grd.h.*grd.mask_rho_nan,clev);
+    set(hanc,'edgecolor',0.5*[1 1 1])
     hold off
+    han.contours = hanc;
   end
 end
-amerc
-grid on
+
 set(gca,'tickdir','out')
 titlestr{1} = ['Model bathymetry ' strrep(grd_file,'_','\_')];
 switch var
@@ -78,9 +80,12 @@ switch var
     titlestr{2} = '\Deltat max < min(\Deltax,\Deltay)/sqrt(gh)';
 end
 title(titlestr,'fontsize',12)
-colorbar('h')
+han.colorbar = colorbar('h');
+
+amerc
+han.colorbar.Position = [0.45 0.16 0.35 0.02];
 
 if nargout > 0
-  han = hanc;
+  hanout = han;
 end
 

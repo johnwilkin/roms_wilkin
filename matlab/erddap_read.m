@@ -20,16 +20,17 @@ function [DATA,url] = erddap_read(url)
 tmpfile = ['tmp_' randstr(10) '.mat'];
 
 try
-  tmp = load(urlwrite(url,tmpfile));
+  tmp = load(websave(tmpfile,url));
 catch
   % url may need percent encoding
   % disp('percent encoding the url')
   url = [url(1:strfind(url,'.mat?')+4) ...
     urlencode(url(strfind(url,'.mat?')+5:end))];
   try
-    tmp = load(urlwrite(url,tmpfile));
+    tmp = load(websave(tmpfile,url));
   catch
-    warning('ERDDAP read failed - possibly no data within constraints')
+    warning(['ERDDAP read failed - possibly timeout of no data within',...
+      ' constraints'])
     DATA = NaN;
     return
   end
