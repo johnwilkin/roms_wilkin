@@ -41,7 +41,7 @@ nextplotstatewas = get(gca,'nextplot');
 % hold whatever is already plotted
 set(gca,'nextplot','add')
 
-ROMScoordinates = false;
+ROMScoordinates = true;
 
 if vec_d
   switch lower(var)
@@ -99,10 +99,32 @@ if vec_d
   end
   u = squeeze(u);
   v = squeeze(v);
-  if ROMScoordinates
-     hanq = roms_quivergrd(u,v,grd,vec_d,uscale,varargin{:});
+  if ~ROMScoordinates
+    hanq = quiver(x,y,uscale*u,uscale*v,0,varargin{:});
   else
-     hanq = quiver(x,y,uscale*u,uscale*v,0,varargin{:});
+    if uscale > 0
+      % quiver plot
+      [hanq,dataq] = roms_quivergrd(u,v,grd,vec_d,uscale,varargin{:});
+    else
+      % curvy track plot
+      x = grd.lon_rho;
+      y = grd.lat_rho;
+      dmask = grd.mask_rho_nan;
+      lon0 = x(1:vec_d:end,1:vec_d:end);
+      lat0 = y(1:vec_d:end,1:vec_d:end);
+      dmask = dmask(1:vec_d:end,1:vec_d:end);
+      lon0(isnan(dmask)) = [];
+      lat0(isnan(dmask)) = [];
+      
+      % clip to limits of current axes to speed this up
+      ca = gca;
+      index = find(lon0>ca.XLim(1) & lon0<ca.XLim(2) & ...
+        lat0>ca.YLim(1) & lat0<ca.YLim(2));
+      lon0 = lon0(index);
+      lat0 = lat0(index);
+      [hanq,curdata] = ...
+        roms_curquivergrd(u,v,grd,lon0(:),lat0(:),-uscale,10,varargin{:});
+    end
   end
 end
 
@@ -113,6 +135,10 @@ if nargout > 0
   thedata.u = u;
   thedata.v = v;
   thedata.t = t;
+  if uscale < 0
+    thedata.xcurv = curdata.lon;
+    thedata.ycurv = curdata.lat;
+  end
 end
 if nargout > 1
   thegrid = grd;

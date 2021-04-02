@@ -62,11 +62,8 @@ switch var
     
 end
 
-% if the bathymetry is significantly negative the z coordinate profiles 
-% on land can become non monotonic which breaks the logic. 
-% force z==0 everywhere on land to avoid this
 tmp(1,:,:) = mask;
-z = bsxfun(@times,tmp,z);
+z = bsxfun(@times,tmp2,grd.z_r);
 z = reshape(z,[size(z,1) size(z,2)*size(z,3)]);
 
 % code lifted from omviz/scrum_zslice:
