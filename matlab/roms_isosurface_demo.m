@@ -10,6 +10,7 @@ f = 'http://tds.marine.rutgers.edu/thredds/dodsC/roms/doppio/2017_da/avg/Average
 g = roms_get_grid(f,f);
 
 %% Example 1: The salinity = 33 front of central Mid-Atlantic Bight
+figure(1)
 varname = 'salt';
 value = 33;
 
@@ -26,11 +27,12 @@ xlim([-75 -70]); ylim([37 41.5]); zlim([-100 20]);
 daspect([1 1 100])
 
 %% Example 2: The mid summer Cold Pool of the Mid-Atlantic Bight
+figure(2)
 varname = 'temp';
-value = 8;
+value = 10;
 
 % make the plot
-tindex = 942; % '31-May-2020 12:00:00'
+tindex = 1281; % 5-April: 10C cold pool has formed
 [S,P,H] = roms_isosurface(f,varname,tindex,value,g);
 
 % modify the view point
@@ -42,6 +44,7 @@ xlim([-75 -70]); ylim([37 41.5]); zlim([-100 20]);
 daspect([1 1 100])
 
 %% Example 3: high u-velocity in the Gulf Stream
+figure(3)
 varname = 'u';
 value = 0.5;
 
