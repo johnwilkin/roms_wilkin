@@ -18,6 +18,8 @@ function [Snew,Pobj,Hobj] = roms_isosurface(file,varname,time,value,g,azel)
 % See roms_isosurface_demo.m for examples on how to use this function.
 %
 % John Wilkin - Jan 2021
+%
+% Copyright (c) 2021 - John L. Wilkin - jwilkin@rutgers.edu
 
 % For now only support input 'time' as the tindex into the file. 
 tindex = time;
