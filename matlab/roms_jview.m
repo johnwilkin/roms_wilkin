@@ -162,7 +162,7 @@ if nargout > 0
   Data.lon = lon;
   Data.lat = lat;
   Data.z = z;
-  Data.t = dnum;
+  Data.t = t;
 end
 
 if nargout > 1
