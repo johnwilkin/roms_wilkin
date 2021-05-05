@@ -1,5 +1,5 @@
-function [han,lon,lat] = roms_plot_river_source_locations(file,g,color)
-% han = roms_plot_river_source_locations(file,grd,[color])
+function [han,hant,lon,lat] = roms_plot_river_source_locations(file,g,color)
+% [han,hant,lon,lat] = roms_plot_river_source_locations(file,grd,[color])
 %
 % Add symbols to an existing plot to show the locations of ROMS river 
 % point sources.
@@ -20,7 +20,8 @@ function [han,lon,lat] = roms_plot_river_source_locations(file,g,color)
 % GRD is a ROMS grid structure computed using roms_get_grid.m
 % COLOR (optional) is the symbol color
 %
-% HANDLE is to the plotted symbols (size number of rivers)
+% HAN is graphics handle to the plotted symbols (size number of rivers)
+% HANT is graphics handle labels than number the rivers as in the file
 %
 % John Wilkin; Sept 28 2014
 %              Updated August 2016 to give more detail
@@ -76,6 +77,7 @@ if nargin < 3
 end
 
 h = nan(size(xpos));
+ht = h;
 lon = h;
 lat = h;
 for r = 1:length(xpos)
@@ -111,22 +113,22 @@ for r = 1:length(xpos)
       lon(r) = g.lon_rho(ypos(r)+1,xpos(r)+1);
       lat(r) = g.lat_rho(ypos(r)+1,xpos(r)+1);
       h(r) = plot(lon(r),lat(r),[color sym]);
-      plot(lon(r),lat(r),[color 'x']);
+      % plot(lon(r),lat(r),[color 'x']);
       
     otherwise
       error('invalid river_direction')
   end
 end
 
-set(h,'MarkerSize',15)
-set(h,'LineWidth',2)
+set(h,'MarkerSize',10)
+set(h,'LineWidth',1)
 % set(h,'MarkerFaceColor',color)
 
 % label with numbers
 plabel = true;
 if plabel
   for r = 1:length(xpos)
-    text(lon(r),lat(r),['  ' int2str(r)],'fontsize',20)
+    ht(r) = text(lon(r),lat(r),['  ' int2str(r)],'fontsize',20);
   end
 end
 
@@ -135,5 +137,8 @@ set(gca,'nextplot',nextplotstatewas);
 
 if nargout > 0
   han = h;
+  if nargout > 1
+    hant = ht;
+  end
 end
 
