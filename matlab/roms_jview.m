@@ -40,29 +40,11 @@ if nargin == 0
   return
 end
 
-% check only if input TIME is in datestr format, and if so find the
-% time index in FILE that is the closest
 if isinf(time)
   time = 'latest';
 end
 if ischar(time)
-  fdnums = roms_get_date(file,-1);
-  if strcmp(time,'latest')
-    time = length(fdnums);
-  else
-    dnum = datenum(time);
-    if dnum >= fdnums(1) && dnum <= fdnums(end)
-      [~,time] = min(abs(dnum-fdnums));
-      time = time(1);
-    else
-      warning(' ')
-      disp(['Requested date ' time ' is not between the dates in '])
-      disp([file ' which are ' datestr(fdnums(1),0) ' to ' ])
-      disp(datestr(fdnums(end),0))
-      thedata = -1;
-      return
-    end
-  end
+  time = roms_get_time_index(file,time);
 end
 
 if iscell(var) % case function is called in a cell list loop of varnames
@@ -132,29 +114,17 @@ if log_chl
   set(get(hancb,'xlabel'),'string','mg m^{-3}')
 end
 
-% time information
-dateformat = 0;
-if isfinite(t)
-  tstr = [' - Date ' datestr(t,dateformat)];
+% get the time/date for plot label
+t = roms_get_time(file,time);
+if isdatetime(t)
+  tdate = ['on day ' datestr(t,0)];
 else
-  warning([ 'Problem parsing date from file ' file ' for time index ' time])
-  tstr = [];
+  tdate = ['on day ' num2str(t,'%8.2f')];
 end
-% dateformat = 1;
-% try
-%   [dnum,dstr] = roms_get_date(file,time,dateformat);
-%   tstr = [' - Date ' dstr];
-%   % tunits = nc_attget(file,'ocean_time','units');
-%   % tstr = [' - Date ' datestr(t+datenum(parsetnc(tunits)),dateformat) ];
-% catch
-%   warning([ 'Problem parsing date from file ' file ' for time index ' time])
-%   tstr = [];
-% end
 
 titlestr = ...
     {['file: ' strrep_(file) ],...
-    [(strrep_(var)) tstr labstr]};
-
+    [(strrep_(var)) ' ' tdate labstr]};
 title(titlestr)
 
 if nargout > 0

@@ -1,5 +1,5 @@
-function [dnum,isdnum] = roms_get_time(file,varargin)
-% [dnum,isdnum] = roms_get_time(file,tvarname,tindex,tlen,tstride)
+function [dnum,tindex] = roms_get_time(file,varargin)
+% [dnum,tindex] = roms_get_time(file,[tvarname],tindex,[tlen],[tstride])
 %
 % Read time from netcdf file and convert to DATENUM
 % Parses the UNITS string to get base date and conversion factor to days.
@@ -12,12 +12,12 @@ function [dnum,isdnum] = roms_get_time(file,varargin)
 %              If not given, scan the file for variables named
 %                 'time' then 'ocean_time' then 'bry_time' then 'frc_time'
 %    TINDEX    If not given, get all times
-%              If TINDEX is a scalar, get this value ...
-%                 unless TLEN is present, then get TLEN values starting at TINDEX
-%                 If TSTRIDE is present, get TLEN values skipping TSTRIDE
+%              If TINDEX is a scalar, get this value
 %              If TINDEX is a vector, get all these values ... but the
-%                 STRIDE in TINDEX must be a constant (start:N:end)
-%
+%                 STRIDE in TINDEX must be constant (start:N:end)
+%    TLEN      If TLEN is present, then get TLEN values starting at TINDEX
+%    TSTRIDE   If TSTRIDE is present, get TLEN values skipping TSTRIDE
+%              
 % Examples:
 %
 %    dnum = roms_get_time(file);                   % get all dates
@@ -92,7 +92,6 @@ end
 if numel(tindex) > 1 % a vector of time indices was input
   tlen = length(tindex);
   dt = unique(diff(tindex));
-  tindex = tindex(1);
   if numel(dt)~=1
     error('TINDEX values must step by a constant STRIDE')
   end
@@ -102,9 +101,9 @@ if numel(tindex) > 1 % a vector of time indices was input
 end
 
 if exist('tstride','var')
-  time = ncread(file,tvarname,tindex,tlen,tstride);
+  time = ncread(file,tvarname,tindex(1),tlen,tstride);
 else
-  time = ncread(file,tvarname,tindex,tlen);
+  time = ncread(file,tvarname,tindex(1),tlen);
 end
 time = double(time);
 
@@ -132,10 +131,9 @@ try
   if strncmp(tsince,'0001-01-01',10)||strncmp(tsince,'0000-00-00',10)
     % assume not a real calendar date and just convert model time to days
     dnum = time/fac;
-    isdnum = false;
   else
     dnum = time/fac + datenum(tsince);
-    isdnum = true;
+    dnum = datetime(dnum,'ConvertFrom','datenum');
   end
 catch
   warning("Unable to parse base date from units string:" + newline + units)

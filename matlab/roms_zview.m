@@ -89,29 +89,11 @@ if nargin == 0
   error('Usage: roms_zview(file,var,time,depth,grd,vec_d,uscale,varargin)');
 end
 
-% check if input TIME is in datestr format, and if so find the
-% time index in FILE that is the closest
 if isinf(time)
   time = 'latest';
 end
 if ischar(time)
-  fdnums = roms_get_date(file,-1);
-  if strncmp(time,'latest',2)
-    time = length(fdnums);
-  else
-    dnum = datenum(time);
-    if dnum >= fdnums(1) && dnum <= fdnums(end)
-      [~,time] = min(abs(dnum-fdnums));
-      time = time(1);
-    else
-      warning(' ')
-      disp(['Requested date ' time ' is not between the dates in '])
-      disp([file ' which are ' datestr(fdnums(1),0) ' to ' ])
-      disp(datestr(fdnums(end),0))
-      thedata = -1;
-      return
-    end
-  end
+  time = roms_get_time_index(file,time);
 end
 
 if nargin < 5
@@ -155,8 +137,8 @@ switch var
     datau = roms_zslice(file,'u',time,depth,grd);
     datav = roms_zslice(file,'v',time,depth,grd);
     % average to rho points
-    datau(isnan(datau)==1) = 0;
-    datav(isnan(datav)==1) = 0;    
+    datau(isnan(datau)) = 0;
+    datav(isnan(datav)) = 0;    
     datau = datau(:,[1 1:end end]);
     datau = av2(datau')';
     datav = datav([1 1:end end],:);
@@ -171,12 +153,12 @@ switch var
     datau = roms_zslice(file,'u',time,depth,grd);
     datav = roms_zslice(file,'v',time,depth,grd);
     data = roms_vorticity(datau,datav,grd,'relative');
-    depstr = [' - Depth ' num2str(abs(depth)) ' m '];
+    depstr = [' at depth ' num2str(abs(depth)) ' m '];
   case 'ow'
     datau = roms_zslice(file,'u',time,depth,grd);
     datav = roms_zslice(file,'v',time,depth,grd);
     data = roms_vorticity(datau,datav,grd,'okubo-weiss');
-    depstr = [' - Depth ' num2str(abs(depth)) ' m '];
+    depstr = [' at depth ' num2str(abs(depth)) ' m '];
   case {'omegaca','omegaar','ph','phtotal'}
     temp = roms_zslice(file,'temp',time,depth,grd);
     salt = roms_zslice(file,'salt',time,depth,grd);
@@ -184,10 +166,10 @@ switch var
     tic = roms_zslice(file,'TIC',time,depth,grd);
     press = -depth*ones(size(salt));
     data = roms_co2sys_var(var,temp,salt,alk,tic,press); 
-    depstr = [' - Depth ' num2str(abs(depth)) ' m '];
+    depstr = [' at depth ' num2str(abs(depth)) ' m '];
   otherwise
     data = roms_zslice(file,var,time,depth,grd);
-    depstr = [' - Depth ' num2str(abs(depth)) ' m '];
+    depstr = [' at depth ' num2str(abs(depth)) ' m '];
 end
 
 long_name = ' ';
@@ -344,8 +326,8 @@ if nargin > 5
   end
 end
 
-% change plotaspectratio to be approximately Mercator
-% if you don't like this, add variable merc = false to the grd structure
+% Change plotaspectratio to be approximately Mercator
+% If you don't like this, add variable merc = false to the grd structure
 % to disable this
 if isfield(grd,'merc')
   if grd.merc 
@@ -370,14 +352,17 @@ try
 catch
 end
 
-% get the time/date
-[t,tdate] = roms_get_date(file,time,0);
+% get the time/date for plot label
+t = roms_get_time(file,time);
+if isdatetime(t)
+  tdate = ['on day ' datestr(t,0)];
+else
+  tdate = ['on day ' num2str(t,'%8.2f')];
+end
 
 % label
 titlestr{1} = ['file: ' strrep_(file)];
 titlestr{2} = [varlabel ' ' tdate ' ' depstr];
-%itlestr{2} = tdate; titlestr{3} = [varlabel ' ' depstr];
-
 hantitle = title(titlestr);
 
 % pass data to outputs

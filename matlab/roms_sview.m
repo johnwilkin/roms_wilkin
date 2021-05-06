@@ -79,30 +79,37 @@ if nargin == 0
   error('Usage: roms_sview(file,var,time,k,grd,vec_d,uscale,varargin)');
 end
 
-% check if input TIME is in datestr format, and if so find the
-% time index in FILE that is the closest
 if isinf(time)
   time = 'latest';
 end
 if ischar(time)
-  fdnums = roms_get_date(file,-1);
-  if strncmp(time,'latest',2)
-    time = length(fdnums);
-  else
-    dnum = datenum(time);
-    if dnum >= fdnums(1) && dnum <= fdnums(end)
-      [~,time] = min(abs(dnum-fdnums));
-      time = time(1);
-    else
-      warning(' ')
-      disp(['Requested date ' time ' is not between the dates in '])
-      disp([file ' which are ' datestr(fdnums(1),0) ' to ' ])
-      disp(datestr(fdnums(end),0))
-      thedata = -1;
-      return
-    end
-  end
+  time = roms_get_time_index(file,time);
 end
+
+% % check if input TIME is in datestr format, and if so find the
+% % time index in FILE that is the closest
+% if isinf(time)
+%   time = 'latest';
+% end
+% if ischar(time)
+%   fdnums = roms_get_date(file,-1);
+%   if strncmp(time,'latest',2)
+%     time = length(fdnums);
+%   else
+%     dnum = datenum(time);
+%     if dnum >= fdnums(1) && dnum <= fdnums(end)
+%       [~,time] = min(abs(dnum-fdnums));
+%       time = time(1);
+%     else
+%       warning(' ')
+%       disp(['Requested date ' time ' is not between the dates in '])
+%       disp([file ' which are ' datestr(fdnums(1),0) ' to ' ])
+%       disp(datestr(fdnums(end),0))
+%       thedata = -1;
+%       return
+%     end
+%   end
+% end
 
 if isinf(k)
   k = grd.N;
@@ -160,7 +167,7 @@ if any(strcmp(dimNames,'s_rho')) || any(strcmp(dimNames,'s_w')) ...
     || any(strcmp(dimNames,'sc_r'))
   START = [time-1 1 k-1  0  0]; % 2nd dim is for perfect restart files
   COUNT = [1      1 1   -1 -1];
-  depstr = [ ' Level ' int2str(k) ' '];
+  depstr = [ ' at level ' int2str(k) ' '];
 else
   START = [time-1 1  0  0];
   COUNT = [1      1 -1 -1];
@@ -225,7 +232,7 @@ switch var
     datav = datav([1 1:end end],:);
     datav = av2(datav);
     data = abs(datau+sqrt(-1)*datav);
-    depstr = [ ' Level ' int2str(k) ' '];
+    depstr = [ ' at level ' int2str(k) ' '];
     % var = 'temp'; % for time handling
   case 'rvor'
     datau = squeeze(nc_varget(file,'u',START,COUNT)); 
@@ -435,19 +442,24 @@ try
 catch
 end
 
-% get the time/date
-try
-  [t,tdate] = roms_get_date(file,time,0);
-catch
-  t = NaN;
-  tdate = 'unknown';
+% get the time/date for plot label
+t = roms_get_time(file,time);
+if isdatetime(t)
+  tdate = ['on day ' datestr(t,0)];
+else
+  tdate = ['on day ' num2str(t,'%8.2f')];
 end
+
+% try
+%   [t,tdate] = roms_get_date(file,time,0);
+% catch
+%   t = NaN;
+%   tdate = 'unknown';
+% end
 
 % label
 titlestr{1} = ['file: ' strrep_(file)];
 titlestr{2} = [varlabel ' ' tdate ' ' depstr];
-%itlestr{2} = tdate; titlestr{3} = [varlabel ' ' depstr];
-
 hantitle = title(titlestr);
 
 % pass data to outputs
