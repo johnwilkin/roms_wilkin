@@ -1,7 +1,7 @@
 % Script roms_write_era5_NCARds633_frcfile.m
 %
 % Create a ROMS meteorology forcing file from ERA5 reanalysis extracted
-% from NCAR dataset ds633.0 using roms_get_era5_ncar_ds633.m, i.e. ...
+% from NCAR dataset ds633.0
 %
 % First run e.g. E = roms_get_era5_ncar_ds633(year,month,bounding_box...)
 % and then run this script to create the forcing netcdf file.
@@ -28,12 +28,25 @@
 %
 % See also roms_get_era5_NCARds633_bulkflux
 
-%% ------------------------------------------------------------------------
-
-% USER SETS PARAMETERS IN THIS BLOCK
+% -------------------------------------------------------------------------
+% USER SETS PARAMETERS IN THIS BLOCK --------------------------------------
 
 % shift time to the ROMS basedate you want to use
-Time0 = datenum(2018,5,1);
+% Time0 = datenum(2007,1,1);
+
+% Output file name prefix. If not set, name is MY_APPLICATION
+% ROMS_APP = 
+
+% Output path. If not set data are written to the working directory.
+% Outdir = 
+
+% -------------------------------------------------------------------------
+% -------------------------------------------------------------------------
+
+% shift time to the ROMS basedate you want to use
+if ~exist('Time0','var')
+  Time0 = datenum(1970,1,1);
+end
 time = E.time.data - Time0;
 Tname = 'time'; % need to reset some parameters from roms_metadata
 
@@ -41,11 +54,15 @@ Tname = 'time'; % need to reset some parameters from roms_metadata
 YYYY = upper(int2str(E.yyyy));
 MM = upper(sprintf('%02d',E.mm));
 
-% Set the output file name prefix
-ROMS_APP = 'MYAPPLICATION'; % for example
+if ~exist('ROMS_APP','var')
+  ROMS_APP = 'MY_APPLICATION';
+end
 ncname = strcat('frc_',ROMS_APP,'_ERA5_bulkflux_',YYYY,MM,'.nc');
-titlestr = strcat('ERA-5 meteorology forcing (from NCAR ds633.0) for ',...
-  ROMS_APP);
+if ~exist('Outdir','var')
+  Outdir = pwd;
+end
+
+titlestr = "ERA-5 meteorology forcing (from NCAR ds633.0) for " +ROMS_APP;
 citation = E.citation;
 
 spherical = true;
@@ -79,7 +96,7 @@ fprintf('\n')
 
 clear S
 S.Filename = ncname;
-Outfile = fullfile(pwd,S.Filename);
+Outfile = fullfile(Outdir,S.Filename);
 
 Im = length(lon);
 Jm = length(lat);
@@ -116,7 +133,7 @@ S.Attributes(11).Value = datestr(E.time.data(1),31);
 S.Attributes(12).Name = 'time_coverage_end';
 S.Attributes(12).Value = datestr(E.time.data(end),31);
 S.Attributes(13).Name = 'roms_application';
-S.Attributes(13).Value = 'Geospatial extent covers domain of WATL (West Atlantic) grid';
+S.Attributes(13).Value = "Geospatial extent for application " +ROMS_APP;
 
 % nc file dimensions
 S.Dimensions(1).Name = 'lon';
