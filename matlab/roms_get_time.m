@@ -46,12 +46,12 @@ else
 end
 
 if isempty(tvarname)
-  timenamelist = {'time','ocean_time','bry_time','frc_time'};
+  timenamelist = {'time','ocean_time','bry_time','frc_time','sea_time'};
   % scan file for time coordinate variable
   I = ncinfo(file);
   for tn = timenamelist
     tnstr = char(tn);
-    if findstrinstruct(I.Variables,'Name',tn)
+    if findstrinstruct(I.Variables,'Name',tnstr)
       tvarname = tnstr;
       break
     end
@@ -108,7 +108,7 @@ end
 time = double(time);
 
 units = ncreadatt(file,tvarname,'units');
-switch units(1:4)
+switch lower(units(1:4))
   case 'mill'
     fac = 86400e3;
   case 'seco'

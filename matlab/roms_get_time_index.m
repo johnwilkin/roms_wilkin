@@ -32,7 +32,7 @@ switch length(varargin)
 end
 
 if isempty(tvarname)
-  timenamelist = {'time','ocean_time','bry_time','frc_time'};
+  timenamelist = {'time','ocean_time','bry_time','frc_time','sea_time'};
   % scan file for time coordinate variable
   I = ncinfo(file);
   for tn = timenamelist

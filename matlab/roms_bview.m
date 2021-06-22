@@ -26,6 +26,9 @@ end
 if iscell(varname) % in case called in a cell list loop of varnames
   varname = char(varname);
 end
+if iscell(bndy)
+  bndy = char(bndy);
+end
 
 if isempty(grd)
   try
@@ -41,6 +44,17 @@ if ~isempty (nsew_check)
   bndy = varname((nsew_check+1):end);
 else
   varname = [varname '_' bndy];
+end
+
+% time coordinate variable
+tvarname = roms_get_time_varname(file,varname);
+
+% time information
+if isinf(time)
+  time = 'latest';
+end
+if ischar(time)
+  time = roms_get_time_index(file,tvarname,time);
 end
 
 % get appropriate z data for u, v or rho points
@@ -91,7 +105,6 @@ rearth = 6370.800; % km
 dy = rearth*pi/180*diff(lat);
 dx = rearth*pi/180*diff(lon).*cos(pi/180*0.5*(lat(2:end)+lat(1:end-1)));
 dist = cumsum([0; sqrt(dx(:).^2+dy(:).^2)]);
-% dist = cumsum([0; sw_dist(lat,lon,'km')]);
 
 dist = repmat(dist',[size(z,1) 1]);
 lon = repmat(lon',[size(z,1) 1]);
@@ -101,32 +114,17 @@ m = repmat(m',[size(z,1) 1]);
 data = nc_varget(file,varname,[time-1 0 0],[1 -1 -1]);
 data = squeeze(data);
 
-% time information
-dateformat = 0;
-try
-  [dnum,dstr] = roms_get_date(file,time,dateformat);
-  tstr = [' - Date ' dstr];
-catch
-  try
-    [dnum,dstr] = roms_get_date(file,time,dateformat,'bry_time');
-    tstr = [' - Date ' dstr];
-  catch
-    try
-      time_name = [varname(1:strfind(varname,'_')-1) '_time'];
-      [dnum,dstr] = roms_get_date(file,time,dateformat,time_name);
-      tstr = [' - Date ' dstr];   
-    catch
-      warning([ 'Problem parsing date from file ' file ' for time index ' time])
-      dnum = NaN;
-      tstr = ' - Date unknown';
-    end
-  end
+% get the time/date for plot label
+t = roms_get_time(file,time);
+if isdatetime(t)
+  tdate = ['on day ' datestr(t,0)];
+else
+  tdate = ['on day ' num2str(t,'%8.2f')];
 end
 
 % pcolor plot of the variable
 titlestr = ...
-  {['file: ' strrep_(file) ],...
-  [upper(strrep_(varname)) tstr]};
+  {['file: ' strrep_(file) ],tdate,upper(strrep_(varname))};
 
 switch xcoord
   case 'lon'
@@ -153,7 +151,7 @@ if nargout > 0
   Data.dist = dist;
   Data.mask = m;
   Data.z = z;
-  Data.dnum = dnum;
+  Data.t = t;
   Data.tstr = titlestr;
 end
 

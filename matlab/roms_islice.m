@@ -48,10 +48,11 @@ data = squeeze(data);
 
 % Forecast Model Run Collection (FMRC) changes time coordinate to "time" 
 % but leaves the coordinates attribute pointed to ocean_time
-Vinfo = ncinfo(file,var);
-time_variable = Vinfo.Dimensions(end).Name;
+% Vinfo = ncinfo(file,var);
+% time_variable = Vinfo.Dimensions(end).Name;
 % t = nc_varget(file,time_variable,time-1,1);
 % t = ncread(file,time_variable,time,1);
+time_variable = roms_get_time_varname(file,var);
 t = roms_get_time(file,time_variable,time);
 
 % determine where on the C-grid these values lie

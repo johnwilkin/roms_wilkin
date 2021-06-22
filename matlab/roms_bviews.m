@@ -52,13 +52,16 @@ for k=1:nax
   end
   
   axes(hax(k))
-  hant = pcolorjw(data.dist,data.z,data.mask.*data.var);
+  hant = pcolorjw(data.dist,data.z,data.mask.*data.data);
   xlim(range(data.dist));
   
   if k==axm
     hax(k).Title.String = data.tstr;
     hax(k).Title.FontWeight = 'normal';
     xlabel('distance (km) in each sector')
+  else
+    hax(k).Title.String = data.tstr{3};
+    hax(k).Title.FontWeight = 'normal';
   end
   
   tmp = ylim;
