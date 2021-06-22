@@ -442,6 +442,11 @@ for vname = ecmwf_bulkflux_vars
   end
 end
 
+% Times are a few seconds off the hour. Round to nearest hour. 
+% tmp = E.(v).time;
+% tmp = floor(tmp)+round(((tmp-floor(tmp))*24))/(24);
+% E.(v).time = tmp;
+
 E.time.data = E.(v).time;
 E.lon.data = lon;
 E.lat.data = lat;
@@ -450,7 +455,7 @@ E.mm = mm;
 E.description = 'https://rda.ucar.edu/datasets/ds633.0';
 
 E.citation = [ ...
-  'European Centre for Medium-Range Weather Forecasts, 2019,' ,...
+  'European Centre for Medium-Range Weather Forecasts, 2019, ' ,...
   'updated monthly. ERA5 Reanalysis (0.25 Degree Latitude-Longitude ',...
   'Grid). Research Data Archive at the National Center for ',...
   'Atmospheric Research, Computational and Information Systems ',...
