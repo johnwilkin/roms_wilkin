@@ -29,7 +29,7 @@ catch
   try
     tmp = load(websave(tmpfile,url));
   catch
-    warning(['ERDDAP read failed - possibly timeout of no data within',...
+    warning(['ERDDAP read failed - possibly timeout or no data within',...
       ' constraints'])
     DATA = NaN;
     return

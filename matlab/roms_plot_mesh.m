@@ -12,8 +12,8 @@ function h = roms_plot_mesh(g,varargin)
 %         'psi' (DEFAULT) or 'rho' mesh from respective points
 %         'edge' or 'boundary' or 'perim' = perimeter of domain
 %         'coast' = discrete land/sea boundary
-%         'wet' = discrete land/sea boundary from wet/dry mask - must have 
-%                       loaded wet/dry masks with roms_get_grid(f,f,tindex) 
+%         'wet' = discrete land/sea boundary from wet/dry mask - must have
+%                       loaded wet/dry masks with roms_get_grid(f,f,tindex)
 %
 % Copyright (c) 2021 - John L. Wilkin - jwilkin@rutgers.edu
 % $Id: roms_plot_mesh.m 597 2020-12-29 16:48:48Z wilkin $
@@ -56,16 +56,28 @@ end
 switch cgrid(1)
   
   case 'r' % rho points
-    han1=plot(g.lon_rho(1:n:end,1:n:end),g.lat_rho(1:n:end,1:n:end),'w-');
-    han2=plot(g.lon_rho(1:n:end,1:n:end)',g.lat_rho(1:n:end,1:n:end)','w-');
+    x = g.lon_rho;
+    y = g.lat_rho;
+    han1=plot(x(1:n:end,1:n:end),y(1:n:end,1:n:end),'w-');
+    han2=plot((x(1:n:end,1:n:end))',(y(1:n:end,1:n:end))','w-');
     han = [han1; han2];
     
   case 'p' % psi points DEFAULT
-    han1=plot(g.lon_psi(1:n:end,1:n:end),g.lat_psi(1:n:end,1:n:end),'w-');
-    han2=plot((g.lon_psi(1:n:end,1:n:end))',(g.lat_psi(1:n:end,1:n:end))','w-');
+    % if you want to trim the plotted mesh then tinker with these masks
+    m = ones(size(g.mask_psi));
+    if 0
+      m = g.mask_psi;
+      m(m==0) = NaN;
+    end
+    x = m.*g.lon_psi;
+    y = m.*g.lat_psi;
+    han1=plot(x(1:n:end,1:n:end),y(1:n:end,1:n:end),'w-');
+    han2=plot((x(1:n:end,1:n:end))',(y(1:n:end,1:n:end))','w-');
+    % han1=plot(g.lon_psi(1:n:end,1:n:end),g.lat_psi(1:n:end,1:n:end),'w-');
+    % han2=plot((g.lon_psi(1:n:end,1:n:end))',(g.lat_psi(1:n:end,1:n:end))','w-');
     han = [han1; han2];
     
-  case {'c','w'} % discrete coast  
+  case {'c','w'} % discrete coast
     [Mp,Lp] = size(g.lon_psi);
     if strcmp(cgrid(1),'w')
       u = diff(g.wetdry_mask_rho,1,1);
