@@ -18,10 +18,14 @@ function B = catstruct(dim,sa,sb)
 na = fieldnames(sa);
 
 for name = na'
+  if ~isfield(sb,name)
+    warning(['No ' char(name) ' in SB - filling with NaNs to allow cat'])
+    % hope first variable in SB is the same dimension as this
+    sb.(char(name)) = NaN(size(sb.(char(na{1}))));
+  end
   try
     B.(char(name)) = cat(dim,sa.(char(name)),sb.(char(name)));
   catch
     warning(['Unable to cat field ' char(name)])
   end
 end
-

@@ -80,6 +80,8 @@ for k=1:nargin
             'nitrogen_buried','carbon_bottom','carbon_buried','C_excess_uptake'};
         case 'bulkflux'
           varlist = {'Uwind','Vwind','Pair','Tair','Qair','swrad','lwrad','lwrad_down','rain'};
+        otherwise
+          error("Input category "+category+" is not an allowed option")
       end
       
     case 'ncom'

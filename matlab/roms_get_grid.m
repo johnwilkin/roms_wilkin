@@ -12,7 +12,7 @@ function grd = roms_get_grid(grd_file,scoord,tindex,~)
 %               are to be added or updated
 %
 % Optional inputs:
-%     scoord_info: ROMS his/rst/avg output file from which the s-coord 
+%     scoord_info: ROMS his/rst/avg output file from which the s-coord
 %               params can be determined
 %            or 4-element vector [theta_s theta_b Tcline N] where
 %               Vtransform=1 and Vstretching=1 is assumed (compatibility)
@@ -24,7 +24,7 @@ function grd = roms_get_grid(grd_file,scoord,tindex,~)
 %            0 implies assume zeta=0
 %            integer implies use this time index into his/rst/avg
 %               file to read zeta
-%               (In this case wet/dry masks will be read if they exist 
+%               (In this case wet/dry masks will be read if they exist
 %                and getpref('ROMS_WILKIN','USE_WETDRY_MASK') == true.
 %            2-d array of zeta values
 %
@@ -42,17 +42,7 @@ function grd = roms_get_grid(grd_file,scoord,tindex,~)
 %           grd.h  (lat,lon)          (j,i)   order
 %           grd_z_r(N,lat,lon)        (k,j,i) order
 %
-% John Wilkin
-% Sept 2002: Correct scoordinate formulation and optionally
-%   include zeta in the calculation
-% October 2009:
-%   Updated (thanks Hernan) to implement new ROMS options for vertical
-%   coordinate stretching - this change requires the functions
-%   stretching.m and set_depth.m from Hernan Arango's ROMS Matlab utilities
-%   available using svn from https://www.myroms.org/svn/src/matlab/utility
-%   Made do calc_zuv the default
-% June 2016:
-%   Added cell area and cell volume to output
+% John Wilkin - 2000
 %
 % Copyright (c) 2021 - John L. Wilkin - jwilkin@rutgers.edu
 % $Id: roms_get_grid.m 596 2020-12-29 16:46:14Z wilkin $
@@ -143,7 +133,7 @@ else
       min(grd.lat_psi(:)) max(grd.lat_psi(:))];
   catch
   end
-  try 
+  try
     grd.perimeter(:,1) = ...
       [grd.lon_psi(1,:)' ; grd.lon_psi(:,end) ; ...
       grd.lon_psi(end,end:-1:1)'; grd.lon_psi(end:-1:1,1)];
@@ -158,7 +148,7 @@ else
       grd.lon_rho(1,end) grd.lat_rho(1,end);
       grd.lon_rho(end,end) grd.lat_rho(end,end)];
   catch
-  end   
+  end
   
   varlist = {'rdrag','rdrag2','ZoBot'};
   for v = varlist
@@ -174,8 +164,8 @@ else
     land = grd.mask_rho_nan==0;
     grd.mask_rho_nan(land) = NaN;
   else
-    % there is no mask information in the file so create unit masks in case
-    % code tries to use them
+    % if there is no mask information in the file so create unit masks
+    % in case code tries to use them
     grd.mask_rho = ones(size(grd.h));
     grd.mask_rho_nan = grd.mask_rho;
     grd.mask_u = ones(size(grd.h(:,2:end)));
@@ -213,7 +203,7 @@ else
       end
     end
   end
-    
+  
   % If the grid file is a refinement grid extract the info
   try grd.refine_factor = ncreadatt(grd_file,'/','refine_factor');
     varlist = {'parent_Imin','parent_Imax','parent_Jmin','parent_Jmax'};
@@ -224,7 +214,7 @@ else
   catch
   end
   
-end % loading 2D fields independent of s-coordinate 
+end % loading 2D fields independent of s-coordinate
 
 if nargin > 1
   
@@ -235,59 +225,65 @@ if nargin > 1
   
   % get z_r and z_w for the given s-coordinate parameters
   
-  if ~ischar(scoord)
-    
-    theta_s = scoord(1);
-    theta_b = scoord(2);
-    Tcline  = scoord(3);
-    N       = scoord(4);
-    if (length(scoord) < 5),
-      Vtransform = 1;
-      Vstretching = 1;
-    else
-      Vtransform = scoord(5);
-      Vstretching = scoord(6);
-    end
-    hc = Tcline;
-    
-  else
-    
-    % input 'scoord' is a his/avg/rst file name or opendap url
-    % attempt to get s-coord params from this file/url
-    
-    theta_s = ncread(scoord,'theta_s');
-    theta_b = ncread(scoord,'theta_b');
-    hc      = ncread(scoord,'hc');
-    try
-    Tcline  = ncread(scoord,'Tcline');
-    catch
-      Tcline = hc;
-    end
-    N       = length(ncread(scoord,'Cs_r'));
-    if nc_isvar(scoord,'Vtransform')
-      Vtransform = ncread(scoord,'Vtransform');
-    else
-      Vtransform = 1;
-    end
-    if nc_isvar(scoord,'Vstretching')
-      Vstretching = ncread(scoord,'Vstretching');
-    else
-      Vstretching = 1;
-    end
-    
-  end
+  [theta_s,theta_b,Tcline,N,Vtransform,Vstretching] = ...
+    roms_get_scoord(scoord);
   
+  % This logic shifted to an embedded function at the end of this file
+  %
+  %   if ~ischar(scoord)
+  %
+  %     theta_s = scoord(1);
+  %     theta_b = scoord(2);
+  %     Tcline  = scoord(3);
+  %     N       = scoord(4);
+  %     if (length(scoord) < 5)
+  %       Vtransform = 1;
+  %       Vstretching = 1;
+  %     else
+  %       Vtransform = scoord(5);
+  %       Vstretching = scoord(6);
+  %     end
+  %     hc = Tcline;
+  %
+  %   else
+  %
+  %     % input 'scoord' is a his/avg/rst file name or opendap url
+  %     % attempt to get s-coord params from this file/url
+  %
+  %     theta_s = ncread(scoord,'theta_s');
+  %     theta_b = ncread(scoord,'theta_b');
+  %     hc      = ncread(scoord,'hc');
+  %     try
+  %       Tcline  = ncread(scoord,'Tcline');
+  %     catch
+  %       Tcline = hc;
+  %     end
+  %     N = length(ncread(scoord,'Cs_r'));
+  %     if nc_isvar(scoord,'Vtransform')
+  %       Vtransform = ncread(scoord,'Vtransform');
+  %     else
+  %       Vtransform = 1;
+  %     end
+  %     if nc_isvar(scoord,'Vstretching')
+  %       Vstretching = ncread(scoord,'Vstretching');
+  %     else
+  %       Vstretching = 1;
+  %     end
+  %
+  %   end
+  
+  hc = Tcline;
   if Vtransform == 1
     hc = min(Tcline,min(h(:)));
   end
-  
+
   [s_rho,Cs_r] = stretching(Vstretching,theta_s,theta_b,hc,N,0,0);
   [s_w  ,Cs_w] = stretching(Vstretching,theta_s,theta_b,hc,N,1,0);
-  
   sc_r = s_rho;
   sc_w = s_w;
   
   % zeta
+  
   zeta = zeros(size(grd.h)); % default
   if nargin > 2 % option to include zeta in z calculation
     
@@ -297,15 +293,16 @@ if nargin > 1
     else % if tindex==0 zeta defaults to zero
       if length(tindex)==1
         % tindex is a single index to zeta in a roms output file
-        if ~ischar(scoord)
-          warning([ 'Cannot process zeta from file(2) in the case ' ...
-            ' that scoord parameters are input as a vector'])
-          disp(['Reading zeta from ' grd_file ' for record ' int2str(tindex)])
-          zeta = nc_varget(grd_file,'zeta',[tindex-1 0 0],[1 -1 -1]);
-        else
+        if ischar(scoord)
           zeta = nc_varget(scoord,'zeta',[tindex-1 0 0],[1 -1 -1]);
           zeta = squeeze(zeta);
+        else
+          warning([ 'Cannot process zeta from file(2) in the case ' ...
+            ' that scoord parameters are input as a vector or structure'])
+          disp(['Reading zeta from ' grd_file ' for record ' int2str(tindex)])
+          zeta = nc_varget(grd_file,'zeta',[tindex-1 0 0],[1 -1 -1]);
         end
+        
         if isempty(zeta)
           warning([ 'zeta not found in ' scoord '. Assuming zeta=0.'])
           zeta = zeros(size(grd.h));
@@ -349,35 +346,31 @@ if nargin > 1
   catch
   end
   
-  % if nargin > 3
-    
-    % compute the z depths on the velocity points as well
-    % this used to be (before 2009/10/08) optional but there is little
-    % reason not to do this and it's annoying when you've forgotten to
-    
-    % u-points (cell centres in vertical)
-    ugrid = 3;
-    z_u = set_depth(Vtransform, Vstretching, theta_s, theta_b, hc, N, ...
-      ugrid, h', zeta', 0);
-    grd.z_u = permute(z_u,[3 2 1]);
-    
-    % u-points (cell edges in vertical)
-    z_uw = 0.5.*(z_w(1:L,1:Mp,:)+z_w(2:Lp,1:Mp,:));
-    grd.z_uw = permute(z_uw,[3 2 1]);
-    
-    % v-points (cell centres in vertical)
-    vgrid = 4;
-    z_v = set_depth(Vtransform, Vstretching, theta_s, theta_b, hc, N, ...
-      vgrid, h', zeta', 0);
-    grd.z_v = permute(z_v,[3 2 1]);
-    
-    % v-points (cell edges in vertical)
-    z_vw= 0.5.*(z_w(1:Lp,1:M,:)+z_w(1:Lp,2:Mp,:));
-    grd.z_vw = permute(z_vw,[3 2 1]);
-    
-    clear z_u z_uw z_v z_vw
-    
-  % end
+  % compute the z depths on the velocity points as well
+  % this used to be (before 2009/10/08) optional but there is little
+  % reason not to do this and it's annoying when you've forgotten to
+  
+  % u-points (cell centres in vertical)
+  ugrid = 3;
+  z_u = set_depth(Vtransform,Vstretching,theta_s,theta_b,hc,N, ...
+    ugrid,h',zeta',0);
+  grd.z_u = permute(z_u,[3 2 1]);
+  
+  % u-points (cell edges in vertical)
+  z_uw = 0.5.*(z_w(1:L,1:Mp,:)+z_w(2:Lp,1:Mp,:));
+  grd.z_uw = permute(z_uw,[3 2 1]);
+  
+  % v-points (cell centres in vertical)
+  vgrid = 4;
+  z_v = set_depth(Vtransform,Vstretching,theta_s,theta_b,hc,N, ...
+    vgrid,h',zeta',0);
+  grd.z_v = permute(z_v,[3 2 1]);
+  
+  % v-points (cell edges in vertical)
+  z_vw= 0.5.*(z_w(1:Lp,1:M,:)+z_w(1:Lp,2:Mp,:));
+  grd.z_vw = permute(z_vw,[3 2 1]);
+  
+  clear z_u z_uw z_v z_vw
   
   grd.dV = dV;
   grd.Vtransform = Vtransform;
@@ -398,3 +391,59 @@ end
 
 warning('OFF','RomsGetGrid:NoVariable')
 
+function [theta_s,theta_b,Tcline,N,Vtransform,Vstretching] = ...
+  roms_get_scoord(scoord)
+% Parse the s-coordinate parameters
+
+if ischar(scoord)
+  
+  % scoord is a his/avg/rst file name or opendap url
+  
+  theta_s = ncread(scoord,'theta_s');
+  theta_b = ncread(scoord,'theta_b');
+  hc = ncread(scoord,'hc');
+  try
+    Tcline  = ncread(scoord,'Tcline');
+  catch
+    Tcline = hc;
+  end
+  N = length(ncread(scoord,'Cs_r'));
+  if nc_isvar(scoord,'Vtransform')
+    Vtransform = ncread(scoord,'Vtransform');
+  else
+    Vtransform = 1;
+  end
+  if nc_isvar(scoord,'Vstretching')
+    Vstretching = ncread(scoord,'Vstretching');
+  else
+    Vstretching = 1;
+  end
+
+elseif isstruct(scoord)
+  
+  % scoord is a previously loaded grd structure
+  theta_s = scoord.theta_s;
+  theta_b = scoord.theta_b;
+  Tcline = scoord.Tcline;
+  N = scoord.N;
+  Vtransform = scoord.Vtransform;
+  Vstretching = scoord.Vstretching;
+  
+else
+  
+  % scoord was a vector of parameters
+  theta_s = scoord(1);
+  theta_b = scoord(2);
+  Tcline  = scoord(3);
+  N       = scoord(4);
+  if (length(scoord) < 5)
+    Vtransform = 1;
+    Vstretching = 1;
+  else
+    Vtransform = scoord(5);
+    Vstretching = scoord(6);
+  end
+  % hc = Tcline;
+
+end
+  

@@ -115,7 +115,7 @@ if log_chl
 end
 
 % get the time/date for plot label
-t = roms_get_time(file,time);
+[t,tindex] = roms_get_time(file,time);
 if isdatetime(t)
   tdate = ['on day ' datestr(t,0)];
 else
@@ -133,6 +133,7 @@ if nargout > 0
   Data.lat = lat;
   Data.z = z;
   Data.t = t;
+  Data.tindex = tindex;
 end
 
 if nargout > 1
