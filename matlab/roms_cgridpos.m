@@ -3,7 +3,7 @@ function pos = roms_cgridpos(s,grd)
 %
 % From the size of a variable determine whether it is defined on the
 % u, v, rho or psi location on the ROMS Arakawa-C grid
-% 
+%
 % John Wilkin
 %
 % Copyright (c) 2021 - John L. Wilkin - jwilkin@rutgers.edu
@@ -21,20 +21,22 @@ end
 su = size(grd.lon_u);
 sv = size(grd.lon_v);
 sr = size(grd.lon_rho);
-sp = size(grd.lon_psi);
+if isfield(grd,'lon_psi')
+  sp = size(grd.lon_psi);
+end
 if sr(1)==sr(2)
   warning([ 'The grid is square so the result of ' ...
-	which(mfilename) ' may be unreliable']);
+    which(mfilename) ' may be unreliable']);
 end
 
 % only the right-most 2 dimensions matter
 s = s([end-1 end]);
-if all(~(s-sv))
-  pos = 'v';
+if all(~(s-sr))
+  pos = 'rho';
 elseif all(~(s-su))
   pos = 'u';
-elseif all(~(s-sr))
-  pos = 'rho';
+elseif all(~(s-sv))
+  pos = 'v';
 elseif all(~(s-sp))
   pos = 'psi';
 else

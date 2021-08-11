@@ -11,7 +11,7 @@ function tindex = roms_get_time_index(file,varargin)
 %    TVARNAME  name of the time variable
 %              If not given, scan the file for variables named
 %                 'time' then 'ocean_time' then 'bry_time' then 'frc_time'
-%    DATE      a DATE STRING that will be parsed to a DATENUM, or
+%    DATE      a date STRING or DATETIME or
 %              'last', 'latest' or 'end', or
 %              a numeric value, in which case the index to the nearest
 %                 time value is returned (with no regard for dates)
@@ -29,6 +29,9 @@ switch length(varargin)
   case 2
     tvarname = varargin{1};
     dstr = varargin{2};
+end
+if isdatetime(dstr)
+  dstr = datestr(dstr);
 end
 
 if isempty(tvarname)
@@ -51,7 +54,7 @@ end
 time = double(ncread(file,tvarname));
 
 if ~ischar(dstr)
-  % input is a time coordinate VALUE
+  % input is a time coordinate VALUE in the ROMS native time units
   if dstr < min(time) || dstr > max(time)
     error("Requested value " + num2str(dstr,'%8.2f') + ...
       " is not in the range " + num2str(time(1),'%8.2f') + " to " ...

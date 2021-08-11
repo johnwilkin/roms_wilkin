@@ -72,12 +72,18 @@ for k=1:nax
     hold on
     plot([0 0],[ymin ymax],'w')
     hold off
+    cmin = min([cmin caxis]);
+    cmax = max([cmax caxis]);
+  else
+    cmin = min(caxis);
+    cmax = max(caxis);
   end
   
   Data(k).data = data;
   
 end
 
+hax(1).CLim = [cmin cmax];
 for k=2:length(hax)
   hax(k).YTick = [];
 end

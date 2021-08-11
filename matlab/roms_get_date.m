@@ -19,6 +19,8 @@ function [Dnum,Dstr] = roms_get_date(file,tindex,dateformat,timevarname)
 %
 % Copyright (c) 2021 - John L. Wilkin - jwilkin@rutgers.edu
 
+warning('try using roms_get_time instead') 
+
 if nargin < 2
   tindex = -1;
 end
