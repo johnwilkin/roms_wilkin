@@ -15,6 +15,7 @@ function [ueast,vnorth] = roms_surface_geostrophic_velocity(zeta,grd)
 %
 % Outputs
 %
+%
 % ueast,vnorth 
 %        components of surface geostrophic velocity on the rho points grid
 %

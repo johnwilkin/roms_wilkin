@@ -82,7 +82,7 @@ end
 if isinf(time)
   time = 'latest';
 end
-if ischar(time)
+if ischar(time) || isdatetime(time)
   time = roms_get_time_index(file,time);
 end
 
