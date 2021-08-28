@@ -29,11 +29,11 @@ function [thedata,thegrid,han] = roms_sview(file,var,time,k,grd,vec_d,uscale,var
 %       if 0 no vectors are plotted
 %
 % uscale = vector length scale
-%       if uscale < 0 then pseudo particle tracks are plotted instead of 
+%       if uscale < 0 then PSEUDO PARTICLE TRACKS are plotted instead of 
 %       quiver velocity vectors, and abs(uscale) is intepretted as the 
 %       duration in days of the track length. See roms_curquivergrd.
 %       This can be very slow on a large grid. If you have zoomed in the
-%       view it will be faster to add curved vectors separately with
+%       view it would be faster to add curved vectors separately with
 %       function roms_addvect.
 %
 % varargin are additional arguments passed on to roms_quivergrd or 

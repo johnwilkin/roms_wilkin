@@ -4,19 +4,33 @@ function [thedata,thegrid,han] = roms_addvect(file,var,time,depth,grd,vec_d,usca
 %                         vec_d,uscale,varargin)
 % 
 % file = roms his/avg/rst etc nc file
+%
 % var = 'u' or 'v'
 %     = 'ubar' or 'vbar'
 %     = 'sustr', 'svstr', 'stress', 'windstress'
 %     = 'Uwind', 'Vwind', 'wind', 'winds'
 %     = 'u_eastward' or 'v_northward' 
+%
 % time = time index into nc file
+%
 % depth = z depth of horizontal slice (m)
+%
 % grd can be 
 %       grd structure (from roms_get_grid)
 %       grd_file name
 %       [] (will attempt to get grid from roms file)
+%
 % vec_d = density (decimation factor) of velocity vectors to plot over 
 %       if 0 no vectors are plotted
+%
+% uscale = vector length scale
+%       if uscale < 0 then PSEUDO PARTICLE TRACKS are plotted instead of 
+%       quiver velocity vectors, and abs(uscale) is intepretted as the 
+%       duration in days of the track length. See roms_curquivergrd.
+%       This can be very slow on a large grid. If you have zoomed in the
+%       view it would be faster to add curved vectors separately with
+%       function roms_addvect.
+%
 % varargin are quiver arguments passed on to roms_quiver
 %
 % This needs a little work to generalize the distinction between
