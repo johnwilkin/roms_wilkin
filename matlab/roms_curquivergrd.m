@@ -9,7 +9,7 @@ function [han,data] = roms_curquivergrd(u,v,grd,lon0,lat0,td,nd,varargin)
 %        u,v  velocity components on their natural postions of the
 %                 staggered C-grid
 %        grd  ROMS grd structure (see function ROMS_GET_GRID)
-% lon0, lat0  vectors of starting coordinates for the tracks
+% lon0, lat0  1-D vectors (not arrays) of starting coordinates for tracks
 %         td  duration of the tracks in days
 %
 % Optional inputs:

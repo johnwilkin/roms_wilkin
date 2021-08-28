@@ -120,7 +120,12 @@ if 1
   x(clip) = NaN;
 end
 
-h = quiver(x,y,uscale*squeeze(u),uscale*squeeze(v),0,varargin{:});
+if 0
+  uscalelon = uscale*cos(pi/180*median(y(:)));
+  h = quiver(x,y,uscalelon*squeeze(u),uscale*squeeze(v),0,varargin{:});
+else
+  h = quiver(x,y,uscale*squeeze(u),uscale*squeeze(v),0,varargin{:});
+end
 
 % restore nextplotstate to what it was
 set(gca,'nextplot',nextplotstatewas);
