@@ -1,5 +1,5 @@
-function E = roms_get_era5_NCARds633_bulkflux(yyyy,mm,bbox,userpass)
-% E = roms_get_era5_NCARds633_bulkflux(yyyy,mm,bbox,userpass)
+function E = roms_get_era5_NCARds633_bulkflux(yyyy,mm,bbox,varargin)
+% E = roms_get_era5_NCARds633_bulkflux(yyyy,mm,bbox,[userpass],[fluxopt])
 %
 % Read ECMWF ERA5 meteorological reanalysis from the NCAR Research Data 
 % Archive (RDA) dataset ds633.0 https://rda.ucar.edu/datasets/ds633.0
@@ -9,12 +9,25 @@ function E = roms_get_era5_NCARds633_bulkflux(yyyy,mm,bbox,userpass)
 % surface forcing netcdf file. 
 %
 % This function reads everything ROMS needs to build a surface forcing 
-% file for the BULK_FLUX option, i.e. marine boundary layer pressure, 2-m 
-% air temperature, 2-m dew point (for conversion to relative humidity), 
-% 10-m winds, net shortwave radiation, and both net longwave and downward 
-% longwave radiation from which ROMS selects depending on whether the ROMS
-% user has #define LONGWAVE_OUT or not.
+% file for:
 %
+%     Bulk fluxes option: marine boundary layer pressure, 2-m air 
+%     temperature, 2-m dew point (for conversion to relative humidity), 
+%     10-m winds, net shortwave radiation, and both net longwave and 
+%     downward longwave radiation from which ROMS selects depending on 
+%     whether the ROMS user has #define LONGWAVE_OUT or not.
+%
+%     Prescribed net fluxes: east and north stress (momentum flux), 
+%     net heat flux (latent + sensible + net longwave + net shortwave), 
+%     net shortwave radiation (if the user wants to #define SOLAR_SOURCE), 
+%     and freshwater flux (kg m^-2 s^-1) from ERA5 rain and evaporation.
+%
+% Guidance on variables in ERA5 collections:
+% e5.oper.an.sfc Surface analysis 
+% https://rda.ucar.edu/datasets/ds633.0/docs/ds633.0.e5.oper.an.sfc.grib1.table.web.txt
+% e5.oper.fc.sfc.meanflux Surface mean rate or fluxes 
+% https://rda.ucar.edu/datasets/ds633.0/docs/ds633.0.e5.oper.fc.sfc.meanflux.grib1.table.web.txt 
+% 
 % ERA5 data are freely available but you must be a registered user at
 % rda.ucar.edu to obtain access. See the "Register Now" link at the top 
 % left of https://rda.ucar.edu to obtain a login). 
@@ -37,12 +50,14 @@ function E = roms_get_era5_NCARds633_bulkflux(yyyy,mm,bbox,userpass)
 %      lon/lat bounding box region to subset with the OPeNDAP query
 %      e.g. bbox = [-110 -30 0 55] or [250 330 0 55] for West Atlantic.
 %      NOTE: The longitude coordinate in ERA5 breaks at the prime meridian. 
-%      This function detects whether in the input longitudes in BBOX are 
+%      This function detects whether the input longitudes in BBOX are 
 %      negative (west of prime meridian) or positive (east of prime 
 %      and adjusts accordingly, but the query cannot stradle the prime 
 %      meridian. For such a case the user has to make two files and merge 
 %      them. If I ever have a project in the east Atlantic I might code 
 %      this merger automatically, but until then you are on your own.
+%
+% Optional inputs:
 %
 %   userpass (string) - RDA authentication in the format:
 %     'username:password' (notice the colon between username and password)
@@ -54,11 +69,19 @@ function E = roms_get_era5_NCARds633_bulkflux(yyyy,mm,bbox,userpass)
 %     is common practise to use an email address as RDA username, the @ 
 %     must be encoded as %40, e.g. my username and password would be 
 %     userpass = 'jwilkin%40rutgers.edu:mypassword' (not my real password!)
-%     If you need help on this conversion, go to:
-%     https://www.w3schools.com/tags/ref_urlencode.ASP
-%     and enter your username or password string to find out how to URL 
-%     encode them to build the username:password string. DON'T URL encode
-%     the colon - that will throw an error
+%     At site https://www.w3schools.com/tags/ref_urlencode.ASP you can
+%     enter your username or password string to find out how to URL 
+%     encode them to build username:password string. But DON'T URL encode
+%     the colon - that will throw an error. 
+%     If userpass is not given, the funciotn endeavors to parse them from
+%     your .netrc file
+%
+%   fluxopt (string) - controls variables read from ERA5 for depending
+%     on the intended use with ROMS forcing files
+%       'bulkfluxes' (default) data for ROMS BULK_FLUXES option
+%       'onlyfluxes' stresses, heat flux, freshwater flux, net shortwave
+%       'allfluxes'  everything to support ROMS running with either bulk
+%                    fluxes or stresses/fluxes.
 %
 % Outputs:
 %
@@ -88,8 +111,25 @@ function E = roms_get_era5_NCARds633_bulkflux(yyyy,mm,bbox,userpass)
 %
 % See also roms_write_era5_NCARds633_frcfile
 
+userpass = [];
+fluxopt = 'bulkfluxes';
+
+for k=1:length(varargin)
+  opt = varargin{k};
+  if contains(opt,':')
+    userpass = opt;
+  else
+    switch opt(1:4)
+      case {'bulk','only','allf'}
+        fluxopt = opt;
+      otherwise
+        error("Option "+opt+" not recognized as a valid option")
+    end
+  end
+end
+
 % ERA5 analysis is username/password restricted
-if nargin < 4
+if isempty(userpass)
   try
   userpass = userpass_from_netrc;
   disp('Using username:password for rda.ucar.edu from $HOME/.netrc')
@@ -105,12 +145,28 @@ server = strcat('https://',userpass,'@',urlbase,'/');
 
 % ERA5 data in this archive use time since 01-01-1900
 epoch = datenum(1900,1,1);
-YYYYMM = [sprintf('%d',yyyy) sprintf('%02d',mm);];
+MM = sprintf('%02d',mm);
 YYYY = sprintf('%d',yyyy);
+YYYYMM = [sprintf('%d',yyyy) sprintf('%02d',mm);];
 
-% All the ERA5 variables needed to ROMS BULK_FLUX option
+% The ERA5 variables needed for ROMS bulk fluxes 
 ecmwf_bulkflux_vars = {'msl','t2','d2','u10','v10',...
   'msdwlwrf','msnlwrf','msnswrf','mtpr'};
+% ... for direct heat fluxes and stresses
+ecmwf_onlyflux_vars = {'msnlwrf','msnswrf','mtpr','mer','msshf','mslhf',...
+  'metss','mntss',};
+% ... for all variables for a combo ROMS forcing file allowing switching
+% between surface forcing options
+ecmwf_allflux_vars = unique([ecmwf_bulkflux_vars'; ecmwf_onlyflux_vars']');
+
+switch fluxopt(1:4)
+  case 'bulk'
+    ecmwf_vars = ecmwf_bulkflux_vars;
+  case 'only'
+    ecmwf_vars = ecmwf_onlyflux_vars;
+  case 'allf'
+    ecmwf_vars = ecmwf_allflux_vars;
+end
 
 % ------------------------------------------------------------------------
 %
@@ -119,104 +175,136 @@ ecmwf_bulkflux_vars = {'msl','t2','d2','u10','v10',...
 
 clear E
 
-E.u10.long = '10-m wind (u)';
-E.u10.name = 'VAR_10U';
-E.u10.code = '165';
+E.u10.long = 'neutral wind at 10 m u-component';
+E.u10.name = 'U10N';  
+E.u10.code = '228_131'; 
 E.u10.units = 'm s-1';
 E.u10.set = 'e5.oper.an.sfc'; % 1 file
-E.u10.v = '10u';
+E.u10.v = 'u10n';
 
-E.v10.long = '10-m wind (v)';
-E.v10.name = 'VAR_10V';
-E.v10.code = '166';
+E.v10.long = 'neutral wind at 10 m v-component';
+E.v10.name = 'V10N';
+E.v10.code = '228_132';
 E.v10.units = 'm s-1';
 E.v10.set = 'e5.oper.an.sfc'; % 1 file
-E.v10.v = '10v';
+E.v10.v = 'v10n';
 
-E.d2.long = '2 meter dewpoint temperature';
+E.d2.long = '2 metre dewpoint temperature';
 E.d2.name = 'VAR_2D';
-E.d2.code = '168';
+E.d2.code = '128_168';
 E.d2.units = 'K';
 E.d2.set = 'e5.oper.an.sfc'; % 1 file
 E.d2.v = '2d';
 
-E.t2.long = '2 meter temperature';
+E.t2.long = '2 metre temperature';
 E.t2.name = 'VAR_2T';
-E.t2.code = '167';
+E.t2.code = '128_167';
 E.t2.units = 'K';
 E.t2.set = 'e5.oper.an.sfc'; % 1 file
 E.t2.v = '2t';
 
 E.msl.long = 'mean sea-level pressure';
 E.msl.name = 'MSL';
-E.msl.code = '151';
+E.msl.code = '128_151';
 E.msl.units = 'Pa';
 E.msl.set = 'e5.oper.an.sfc'; % 1 file
 E.msl.v = 'msl';
 
 E.msshf.long = 'mean surface sensible heat flux';
 E.msshf.name = 'MSSHF';
-E.msshf.code = '033';
+E.msshf.code = '235_033';
 E.msshf.units = 'W m-2';
 E.msshf.set = 'e5.oper.fc.sfc.meanflux'; % 3 files
 E.msshf.v = 'msshf';
 
 E.mslhf.long = 'mean surface latent heat flux';
 E.mslhf.name = 'MSLHF';
-E.mslhf.code = '034';
+E.mslhf.code = '235_034';
 E.mslhf.units = 'W m-2';
 E.mslhf.set = 'e5.oper.fc.sfc.meanflux';  % 3 files
 E.mslhf.v = 'mslhf';
 
 E.msdwlwrf.long = 'mean surface downward long-wave radiation flux';
 E.msdwlwrf.name = 'MSDWLWRF';
-E.msdwlwrf.code = '036';
+E.msdwlwrf.code = '235_036';
 E.msdwlwrf.units = 'W m-2';
 E.msdwlwrf.set = 'e5.oper.fc.sfc.meanflux';  % 3 files
 E.msdwlwrf.v = 'msdwlwrf';
 
 E.msnlwrf.long = 'mean surface net long-wave radiation flux';
 E.msnlwrf.name = 'MSNLWRF';
-E.msnlwrf.code = '038';
+E.msnlwrf.code = '235_038';
 E.msnlwrf.units = 'W m-2';
 E.msnlwrf.set = 'e5.oper.fc.sfc.meanflux';  % 3 files
 E.msnlwrf.v = 'msnlwrf';
 
 E.msnswrf.long = 'mean surface net short-wave radiation flux';
 E.msnswrf.name = 'MSNSWRF';
-E.msnswrf.code = '037';
+E.msnswrf.code = '235_037';
 E.msnswrf.units = 'W m-2';
 E.msnswrf.set = 'e5.oper.fc.sfc.meanflux';  % 3 files
 E.msnswrf.v = 'msnswrf';
 
 E.mtpr.long = 'mean total precipitation rate';
 E.mtpr.name = 'MTPR';
-E.mtpr.code = '055';
+E.mtpr.code = '235_055';
 E.mtpr.units = 'kg m-2 s-1';
 E.mtpr.set = 'e5.oper.fc.sfc.meanflux';  % 3 files
 E.mtpr.v = 'mtpr';
 
+E.mer.long = 'mean evaporation rate'; % opposite sign convention to ROMS
+E.mer.name = 'MER';
+E.mer.code = '235_043';
+E.mer.units = 'kg m-2 s-1';
+E.mer.set = 'e5.oper.fc.sfc.meanflux';  % 3 files
+E.mer.v = 'mer';
+
+E.metss.long = 'mean eastward turbulent surface stress';
+E.metss.name = 'METSS';
+E.metss.code = '235_041';
+E.metss.units = 'N m-2';
+E.metss.set = 'e5.oper.fc.sfc.meanflux';  % 3 files
+E.metss.v = 'metss';
+
+E.mntss.long = 'mean northward turbulent surface stress';
+E.mntss.name = 'MNTSS';
+E.mntss.code = '235_042';
+E.mntss.units = 'N m-2';
+E.mntss.set = 'e5.oper.fc.sfc.meanflux';  % 3 files
+E.mntss.v = 'mntss';
+
+E.lsm.long = 'Land-sea mask';
+E.lsm.name = 'LSM';
+E.lsm.code = '128_172';
+E.lsm.units = '0-1';
+E.lsm.set = 'e5.oper.invariant';
+E.lsm.v = 'lsm';
+
 %% ------------------------------------------------------------------------
 
-for vname = ecmwf_bulkflux_vars
+Nv = length(ecmwf_vars);
+kv = 0;
+
+for vname = ecmwf_vars
   
   v = char(vname);
   
   % Build data urls -------------------------------------------------------
   
+  kv = kv+1;
   disp(' ')
-  disp(['Processing variable ' E.(v).long])
+  disp("Reading variable "+int2str(kv)+" of "+int2str(Nv)+": "+E.(v).long)
   
   clear files
   
-  % ERA5 THREDSS data organization:
+  % ERA5 THREDDS data organization:
   %
   % Marine Boundary Layer variables are from analysis in monthly files. 
   %    One file contains the entire month of 1-hourly data.
   %
   % Flux variables are from forecast files organized in half-month files
   %    but with 6 hours of the 1st of the month in the previous month's
-  %    ddile. A full month of data therefore requires access to three 
+  %    file. A full month of data therefore requires access to three 
   %    files. Flux variables are given as mean rates during each forecast
   %    hour, as opposed to time accumulations used at other ECMWF sources.
   
@@ -229,7 +317,8 @@ for vname = ecmwf_bulkflux_vars
       % month file. To read a complete calendar month therefore requires 
       % reading from 3 files
       
-      varf = strcat(E.(v).set,'.235_',E.(v).code,'_',E.(v).v,'.ll025sc.');
+      varf = strcat(E.(v).set,'.',E.(v).code,'_',E.(v).v,'.ll025sc.');
+      disp(" "+varf+" Year/month "+YYYY+"-"+MM)
       
       % build string for the time span for each of the 3 files
       switch mm
@@ -283,7 +372,8 @@ for vname = ecmwf_bulkflux_vars
       
     case 'e5.oper.an.sfc'
       
-      varf = strcat(E.(v).set,'.128_',E.(v).code,'_',E.(v).v,'.ll025sc.');
+      varf = strcat(E.(v).set,'.',E.(v).code,'_',E.(v).v,'.ll025sc.');
+      disp(" "+varf+" Year/month "+YYYY+"-"+MM)
       
       % build string defining the month time span
       ld = datenum(yyyy,mm+1,1)-datenum(yyyy,mm,1); % last day of month     
@@ -346,7 +436,7 @@ for vname = ecmwf_bulkflux_vars
             fhour = double(ncread(url,'forecast_hour',6,7))/24;
             nf = length(fhour);
             time = repmat(itime',[nf 1])+repmat(fhour,[1 ni]);
-            disp(' Reading file 1 of 3 ...  ')
+            disp('  Reading file 1 of 3 ...  ')
             tic
             data = ncread(url,E.(v).name,[Is Js 6 Last],[Ilen Jlen 7 1]);
             data = flip(data,2);
@@ -367,7 +457,7 @@ for vname = ecmwf_bulkflux_vars
             fhour = double(ncread(url,'forecast_hour'))/24;
             nf = length(fhour);
             time = repmat(itime',[nf 1])+repmat(fhour,[1 ni]);
-            disp('  Reading file 2 of 3 ...  ')
+            disp('   Reading file 2 of 3 ...  ')
             tic
             data = ncread(url,E.(v).name,[Is Js 1 1],[Ilen Jlen Inf Inf]);
             data = flip(data,2);
@@ -386,7 +476,7 @@ for vname = ecmwf_bulkflux_vars
             fhour = double(ncread(url,'forecast_hour'))/24;
             nf = length(fhour);
             time = repmat(itime',[nf 1])+repmat(fhour,[1 ni]);
-            disp('   Reading file 3 of 3 ...  ')
+            disp('    Reading file 3 of 3 ...  ')
             tic
             data = ncread(url,E.(v).name,[Is Js 1 1],[Ilen Jlen Inf Inf]);
             data = flip(data,2);
@@ -415,12 +505,12 @@ for vname = ecmwf_bulkflux_vars
       I = ncinfo(url);
       time = epoch + double(ncread(url,'time'))/24;
       TIME = time(:);
-      disp(' Reading 1 file ...')
+      disp('  Reading 1 file ...')
       Nt = I.Dimensions(1).Length;
       clear data
       tic
       ndays = 16;
-      fprintf(['  in ' int2str(length(1:(ndays*24):Nt)) ' ' ...
+      fprintf(['   in ' int2str(length(1:(ndays*24):Nt)) ' ' ...
         int2str(ndays) '-day chunks: '])
       count = 1;
       for ch=1:(ndays*24):Nt
@@ -452,8 +542,17 @@ E.lon.data = lon;
 E.lat.data = lat;
 E.yyyy = yyyy;
 E.mm = mm;
-E.description = 'https://rda.ucar.edu/datasets/ds633.0';
 
+% time-invariant data
+v = 'lsm'; % land-sea mask
+varf = strcat(E.(v).set,'.',E.(v).code,'_',E.(v).v,'.ll025sc.');
+drange = '1979010100_1979010100';
+url = strcat(server,E.(v).set,'/197901/',varf,drange,'.nc');
+data = ncread(url,E.(v).name,[Is Js 1],[Ilen Jlen 1]);
+data = flip(data,2);
+E.(v).data = data;
+
+E.description = 'https://rda.ucar.edu/datasets/ds633.0';
 E.citation = [ ...
   'European Centre for Medium-Range Weather Forecasts, 2019, ' ,...
   'updated monthly. ERA5 Reanalysis (0.25 Degree Latitude-Longitude ',...
@@ -462,11 +561,7 @@ E.citation = [ ...
   'Laboratory. https://doi.org/10.5065/BH6N-5N20. Accessed ' datestr(now)];
 
 function index = findstrinstruct(S,field,string)
-% index = findstrinstruct(S,field,string)
-%
 % find INDEX into a structure S for which S.FIELD matches STRING
-%
-% John Wilkin - Nov 2018
 % from roms_wilkin toolbox
 index = find(arrayfun(@(n) strcmp(S(n).(field),string), 1:numel(S)));
 

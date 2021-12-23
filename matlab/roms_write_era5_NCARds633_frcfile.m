@@ -1,19 +1,23 @@
 % Script roms_write_era5_NCARds633_frcfile.m
 %
 % Create a ROMS meteorology forcing file from ERA5 reanalysis extracted
-% from NCAR dataset ds633.0
+% from NCAR dataset ds633.0. All variables are included in monthly files.
 %
-% First run e.g. E = roms_get_era5_ncar_ds633(year,month,bounding_box...)
-% and then run this script to create the forcing netcdf file.
+% First run roms_get_era5_ncar_ds633 to get the data in a structure, e.g.:
+%     E = roms_get_era5_ncar_ds633(year,month,bounding_box,fluxopt)
+% Then run this script to create the forcing netcdf file.
 %
 % See the help on roms_get_era5_ncar_ds633 regarding obtaining login
 % credentials to access the ERA5 archive at NCAR Research Data Archive.
 %
-% -------------------------------------------------------------------------
+% THIS IS AN EXAMPLE SCRIPT. The user should configure: 
 %
-% NOTE: This is an example script. The user needs to configure the ROMS
-% time coordinate basedate (Time0) and the output filename (ncname) and
-% title and any other pertinent metadata.
+% (1) ROMS time coordinate basedate (Time0) 
+% (2) APPLICATION NAME to insert in output filename
+% (3) PATH to output directory
+% (4) FLUXOPT to select whether data for ROMS bulk fluxes or direct fluxes
+%     options, or both
+% (5) TITLE string to include in global attributes
 %
 % This script uses routines from the myroms.org Matlab tools
 % (roms_metadata, nc_create, nc_write, nc_constant etc.).
@@ -31,55 +35,57 @@
 % -------------------------------------------------------------------------
 % USER SETS PARAMETERS IN THIS BLOCK --------------------------------------
 
-% shift time to the ROMS basedate you want to use
-% Time0 = datenum(2007,1,1);
+% FLUXOPT should match the call to roms_get_era5_NCARds633_bulkflux, 
+% though if it was originally 'allfluxes'
+% then it is possible here to use just 'bulkfluxes' or 'onlyfluxes' and not
+% write all the variables. 
 
 % Output file name prefix. If not set, name is MY_APPLICATION
-% ROMS_APP = 
+if ~exist('ROMS_APP','var')
+  ROMS_APP = 'MY_APPLICATION';
+end
 
-% Output path. If not set data are written to the working directory.
-% Outdir = 
+% Select ROMS forcing file for option bulk fluxes or direct fluxes or both
+if ~exist('fluxopt','var')
+  fluxopt = 'bulkflux';
+end
 
-% -------------------------------------------------------------------------
-% -------------------------------------------------------------------------
+% Path to output directory
+if ~exist('Outdir','var')
+  Outdir = pwd;
+end
 
-% shift time to the ROMS basedate you want to use
+% Shift time to the ROMS basedate you want to use
 if ~exist('Time0','var')
   Time0 = datenum(1970,1,1);
 end
 time = E.time.data - Time0;
 Tname = 'time'; % need to reset some parameters from roms_metadata
 
+% Build the output filename
 % yyyy and mm are inherited from the call to roms_get_era5_ncar_ds633
 YYYY = upper(int2str(E.yyyy));
 MM = upper(sprintf('%02d',E.mm));
-
-if ~exist('ROMS_APP','var')
-  ROMS_APP = 'MY_APPLICATION';
-end
-ncname = strcat('frc_',ROMS_APP,'_ERA5_bulkflux_',YYYY,MM,'.nc');
-if ~exist('Outdir','var')
-  Outdir = pwd;
-end
+ncname = "frc_"+ROMS_APP+"_ERA5_"+fluxopt+"_"+YYYY+MM+".nc";
 
 titlestr = "ERA-5 meteorology forcing (from NCAR ds633.0) for " +ROMS_APP;
 citation = E.citation;
 
+% -------------------------------------------------------------------------
+
 spherical = true;
 
 % Coordinates and all the data necessary to write this file are in
-% structure E loaded by roms_get_era5_ncar_ds633 for a requested year,
+% structure output by roms_get_era5_ncar_ds633 for a requested year,
 % month, and lon/lat bounding box.
 lon = E.lon.data;
 lat = E.lat.data;
 
-%% ------------------------------------------------------------------------
-
 % Code below adapted from d_ecmwf2roms.m by H. Arango and J. Wilkin in 
-% the Matlab codes distributed at myroms.org. 
+% the Matlab codes distributed at myroms.org
 
-% Create surface forcing NetCDF files. Build creation parameters in
-% structure, S. Combine all variables in monthly files.
+% Build creation parameters in structure, S. 
+% Combine all variables in monthly files.
 
 nctype    = 'nc_float';  
 Unlimited = true;  % time dimension is unlimited
@@ -181,7 +187,14 @@ nc_write(Outfile,'lat',lat);
 % ---------------------------
 % Process a list of ROMS forcing variables
 
-vlist = roms_varlist('bulkflux');
+switch fluxopt
+  case 'bulkflux'
+    vlist = roms_varlist('bulkflux');
+  case 'onlyflux'
+    vlist = roms_varlist('fluxes');
+  case 'allflux'
+    vlist = unique([roms_varlist('bulkflux')'; roms_varlist('fluxes')']');
+end
 first = true;
 
 for v = vlist
@@ -196,6 +209,8 @@ for v = vlist
   
   % Add the ROMS variables to the forcing file
   S.Variables(5) = roms_metadata(Vroms, spherical, nctype, Unlimited);
+  S.Variables(5).Dimensions(1).Name = 'lon';
+  S.Variables(5).Dimensions(2).Name = 'lat';
   S.Variables(5).Dimensions(3).Name = 'time';
   iattT = findstrinstruct(S.Variables(5).Attributes,'Name','time');
   S.Variables(5).Attributes(iattT).Value = 'time';
@@ -203,13 +218,14 @@ for v = vlist
   S.Variables(5).Attributes(iattC).Value = 'lon lat time';
   
   % Prepare to update some long names to be more descriptive of ERA5
-  ilongname = findstrinstruct(S.Variables(5).Attributes,'Name','long_name');
+  ilname = findstrinstruct(S.Variables(5).Attributes,'Name','long_name');
+  iunits = findstrinstruct(S.Variables(5).Attributes,'Name','units');
   
   % write the data ----------------------------------------
   switch Vroms
     case 'Tair'
       field = E.t2.data - 273.15; % Kelvin to Celsius
-      S.Variables(5).Attributes(ilongname).Value = ...
+      S.Variables(5).Attributes(ilname).Value = ...
         'surface air temperature at 2 m';
     case 'Qair'
       % Compute relative humidity using Clausius-Clapeyron equation
@@ -220,21 +236,21 @@ for v = vlist
       VP   = 6.11 .* 10.0 .^ (7.5 .* tdew ./ (237.7 + tdew));
       VPsat = 6.11 .* 10.0 .^ (7.5 .* tsur ./ (237.7 + tsur));
       field = 100.0 .* (VP ./ VPsat);
-      S.Variables(5).Attributes(ilongname).Value = ...
+      S.Variables(5).Attributes(ilname).Value = ...
         'surface air relative humidity at 2 m';
     case 'Pair'
       field = E.msl.data * 0.01;  % Pa to millibar
     case 'Uwind'
       field = E.u10.data;
-      S.Variables(5).Attributes(ilongname).Value = ...
+      S.Variables(5).Attributes(ilname).Value = ...
         'surface u-wind component (east) at 10 m';
     case 'Vwind'
       field = E.v10.data;
-      S.Variables(5).Attributes(ilongname).Value = ...
+      S.Variables(5).Attributes(ilname).Value = ...
         'surface v-wind component (north) at 10 m';
     case 'swrad'
       field = E.msnswrf.data;
-      S.Variables(5).Attributes(ilongname).Value = ...
+      S.Variables(5).Attributes(ilname).Value = ...
         'net solar shortwave radiation flux';
     case 'lwrad_down'
       field = E.msdwlwrf.data;
@@ -242,6 +258,22 @@ for v = vlist
       field = E.msnlwrf.data;
     case 'rain'
       field = E.mtpr.data;
+    case 'sustr'
+      field = E.metss.data;
+    case 'svstr'
+      field = E.mntss.data;
+    case 'shflux'
+      snsbl = E.msshf.data;
+      latnt = E.mslhf.data;
+      lwrad = E.msnlwrf.data;
+      swrad = E.msnswrf.data;
+      field = snsbl+latnt+swrad+lwrad;
+    case 'swflux'
+      evap = -E.mer.data; % ERA5 evap < 0 where latent < 0
+      rain = E.mtpr.data;  % ERA5 rain always > 0
+      rhow = 1000;
+      field = (evap-rain)/rhow; % m s^-1
+      S.Variables(5).Attributes(iunits).Value = 'meter second-1';
     otherwise
       disp(['Skipping ' Vroms])
   end

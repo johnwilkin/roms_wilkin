@@ -1,7 +1,7 @@
 function [dnum,tindex] = roms_get_time(file,varargin)
-% [dnum,tindex] = roms_get_time(file,[tvarname],tindex,[tlen],[tstride])
+% [dtime,tindex] = roms_get_time(file,[tvarname],tindex,[tlen],[tstride])
 %
-% Read time from netcdf file and convert to DATENUM
+% Read time from netcdf file and convert to a DATETIME obect
 % Parses the UNITS string to get base date and conversion factor to days.
 %
 % Inputs:
@@ -16,14 +16,18 @@ function [dnum,tindex] = roms_get_time(file,varargin)
 %              If TINDEX is a vector, get all these values ... but the
 %                 STRIDE in TINDEX must be constant (start:N:end)
 %    TLEN      If TLEN is present, then get TLEN values starting at TINDEX
+%                 but if TLEN < 0 get TLEN values prior to TINDEX
 %    TSTRIDE   If TSTRIDE is present, get TLEN values skipping TSTRIDE
 %              
 % Examples:
 %
-%    dnum = roms_get_time(file);                   % get all dates
-%    dnum = roms_get_time(file,Inf);               % get all dates
-%    dnum = roms_get_time(file,'ocean_time',10,3); % get dates 10, 11, 12
-%    dnum = roms_get_time(file,10,3,2);            % get dates 10, 12, 14
+%    dtime = roms_get_time(file);                   % get all dates
+%    dtime = roms_get_time(file,Inf);               % get all dates
+%    dtime = roms_get_time(file,'ocean_time',10,3); % get dates 10, 11, 12
+%    dtime = roms_get_time(file,10,3,2);            % get dates 10, 12, 14
+%    dtime = roms_get_time(file,'last',-7);         % get last 7 dates
+%
+%    Auxiliary output TINDEX is the index of the first output DTIME
 %
 % THIS FUNCTION replaces roms_get_date
 %
@@ -90,6 +94,7 @@ if isinf(tindex)
   tlen = Inf;
 end
 if numel(tindex) > 1 % a vector of time indices was input
+  % but it must have a constant stride for this to work
   tlen = length(tindex);
   dt = unique(diff(tindex));
   if numel(dt)~=1
@@ -98,6 +103,12 @@ if numel(tindex) > 1 % a vector of time indices was input
   if dt~=1
     tstride = dt;
   end
+end
+
+% tlen < 0 is interpretted as get the values PRIOR to tindex
+if tlen < 0
+  tindex(1) = tindex(1)+tlen+1;
+  tlen = abs(tlen);
 end
 
 if exist('tstride','var')

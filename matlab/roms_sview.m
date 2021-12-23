@@ -156,7 +156,7 @@ switch var
     vartest = 'Uwind';
   case {'umag','rvor','ow'}
     vartest = 'u';
-  case {'omegaca','omegaar','ph','phtotal'}
+  case {'omegaca','OmegaCa','omegaar','OmegaAr','ph','phtotal'}
     vartest = 'salt';
   otherwise
     vartest = var;
@@ -246,13 +246,13 @@ switch var
     datav = squeeze(nc_varget(file,'v',START,COUNT));
     % datav(isnan(datav)) = 0;
     data = roms_vorticity(datau,datav,grd,'okubo-weiss');
-  case {'omegaca','omegaar','ph','phtotal'} 
+  case {'omegaca','OmegaCa','omegaar','OmegaAr','ph','phtotal'} 
     temp = nc_varget(file,'temp',START,COUNT);
     salt = nc_varget(file,'salt',START,COUNT);
     alk = nc_varget(file,'alkalinity',START,COUNT);
     tic = nc_varget(file,'TIC',START,COUNT);
     press = -grd.z_r(k,:,:);
-    data = roms_co2sys_var(var,temp,salt,alk,tic,press); 
+    data = roms_co2sys_var(lower(var),temp,salt,alk,tic,press); 
     data = squeeze(data);
   otherwise
     data = squeeze(nc_varget(file,var,START,COUNT));

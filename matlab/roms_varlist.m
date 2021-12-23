@@ -4,18 +4,20 @@ function varlistout = roms_varlist(varargin)
 % varlist = roms_varlist(categories...) % will be concatenated
 %
 % categories are: 
+%
 %   physics, physics2d, physics3d, mixing3d, 
 %   s-param, s-coord, grid, 
 %   fennel (incl oxygen), fennelN (N only), fennelC (C only)
 %   usecos, usecosC (new C variables only), dom (synonym)
 %   biodiags (all), fenneldiags (just fennel), usecosdiags (just usecos)
-%   bulkflux
+%   bulkflux (all inputs to bulk fluxes)
+%   fluxes (stress, net heat flux and net shortwave)
 %
 % Copyright (c) 2021 - John L. Wilkin - jwilkin@rutgers.edu
 % $Id: roms_varlist.m 526 2019-05-15 18:59:30Z wilkin $
 
 if nargin == 0
-  type(mfilename)
+  help(mfilename)
 end
 
 model = 'roms';
@@ -64,7 +66,8 @@ for k=1:nargin
         case {'co2sys'}
           varlist = {'OmegaCa','OmegaAr','pH'};
         case 'usecosall'
-          varlist = {'NO3','NH4','chlorophyll','phytoplankton','zooplankton',...
+          varlist = {'NO3','NH4','chlorophyll','phytoplankton',...
+            'zooplankton',...
             'LdetritusN','SdetritusN','TIC','alkalinity','LdetritusC',...
             'SdetritusC','oxygen','semilabileDON','refractoryDON',...
             'semilabileDOC','refractoryDOC','OmegaCa','OmegaAr','pH'};
@@ -76,10 +79,13 @@ for k=1:nargin
             'C_excess_uptake'};
         case 'biodiags'
           varlist = {'denitrification','CO2_airsea','pCO2',...
-            'P_Production','NO3_uptake',...
-            'nitrogen_buried','carbon_bottom','carbon_buried','C_excess_uptake'};
+            'P_Production','NO3_uptake','nitrogen_buried',...
+            'carbon_bottom','carbon_buried','C_excess_uptake'};
         case 'bulkflux'
-          varlist = {'Uwind','Vwind','Pair','Tair','Qair','swrad','lwrad','lwrad_down','rain'};
+          varlist = {'Uwind','Vwind','Pair','Tair','Qair','swrad',...
+            'lwrad','lwrad_down','rain'};
+        case 'fluxes'
+          varlist = {'sustr','svstr','shflux','swrad','swflux'};
         otherwise
           error("Input category "+category+" is not an allowed option")
       end

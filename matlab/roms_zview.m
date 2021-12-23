@@ -159,13 +159,13 @@ switch var
     datav = roms_zslice(file,'v',time,depth,grd);
     data = roms_vorticity(datau,datav,grd,'okubo-weiss');
     depstr = [' at depth ' num2str(abs(depth)) ' m '];
-  case {'omegaca','omegaar','ph','phtotal'}
+  case {'omegaca','OmegaCa','omegaar','OmegaAr','ph','phtotal'} 
     temp = roms_zslice(file,'temp',time,depth,grd);
     salt = roms_zslice(file,'salt',time,depth,grd);
     alk = roms_zslice(file,'alkalinity',time,depth,grd);
     tic = roms_zslice(file,'TIC',time,depth,grd);
     press = -depth*ones(size(salt));
-    data = roms_co2sys_var(var,temp,salt,alk,tic,press); 
+    data = roms_co2sys_var(lower(var),temp,salt,alk,tic,press); 
     depstr = [' at depth ' num2str(abs(depth)) ' m '];
   otherwise
     data = roms_zslice(file,var,time,depth,grd);
@@ -232,6 +232,8 @@ if isfield(grd,'special')
   for k=1:length(vlist)
     opt = char(vlist{k});
     switch char(opt)
+      case 'clipdeep'
+        clipdeep = true;
       case 'jormask'
         % apply Jay O'Reilly's mask to trim the plotted nena data
         xpoly = [-82 -79.9422 -55.3695 -55.3695 -82];
@@ -316,8 +318,13 @@ if nargin > 5
       lon0 = x(2:vec_d:end,2:vec_d:end);
       lat0 = y(2:vec_d:end,2:vec_d:end);
       dmask = data(2:vec_d:end,2:vec_d:end);
-      hmask = grd.h(2:vec_d:end,2:vec_d:end);
-      dmask(hmask>1000) = NaN;
+      % hack to clip out strong Gulf Stream vectors in Doppio plots
+      if exist('clipdeep','var')
+        if clipdeep
+          hmask = grd.h(2:vec_d:end,2:vec_d:end);
+          dmask(hmask>1000) = NaN;
+        end
+      end
       lon0(isnan(dmask)) = [];
       lat0(isnan(dmask)) = [];
       [hanquiver,curdata] = roms_curquivergrd(u,v,grd,lon0(:),lat0(:),...
