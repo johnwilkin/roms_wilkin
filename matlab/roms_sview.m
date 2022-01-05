@@ -18,7 +18,7 @@ function [thedata,thegrid,han] = roms_sview(file,var,time,k,grd,vec_d,uscale,var
 %      If time is Inf, 'latest' or 'last' the last record is plotted.
 %
 % k     = index of vertical (s-coordinate) level of horizontal slice 
-%       if k==0 any vector plot will be for ubar,vbar
+%       if k==0 or [] the vector plot will be for ubar,vbar or stresses
 %       if k==Inf plot the surfacemost layer
 %
 % grd can be 
@@ -61,6 +61,9 @@ function [thedata,thegrid,han] = roms_sview(file,var,time,k,grd,vec_d,uscale,var
 %            'omegaca','omegaar','ph','phtotal' use CO2SYS to compute
 %            constituents of the ocean carbon state - alkalinity, TIC must
 %            be present in the ROMS file from the Fennel/BGC model
+%            'swflux' plots the surface freshwater flux inferred from the
+%            output SSFLUX (PSU m s-1) converted to kg m-2 s-1 using the
+%            saved surface salinity and rho_water = 1000
 %
 % Outputs:
 % 
@@ -152,6 +155,8 @@ switch var
     vartest = 'sustr';
   case 'bstress'
     vartest = 'bustr';
+  case 'swflux'
+    vartest = 'ssflux';
   case 'wind'
     vartest = 'Uwind';
   case {'umag','rvor','ow'}
@@ -195,7 +200,6 @@ switch var
     depstr =  ' depth average ';
     % var = 'ubar'; % for time handling
   case 'stress'
-    warning('option not debugged yet')
     datau = squeeze(nc_varget(file,'sustr',START,COUNT));
     datau = datau(:,[1 1:end end]);
     datau = av2(datau')';
@@ -206,7 +210,6 @@ switch var
     depstr =  ' at surface ';
     % var = 'sustr'; % for time handling
   case 'bstress'
-    warning('option not debugged yet')
     datau = squeeze(nc_varget(file,'bustr',START,COUNT));
     datau = datau(:,[1 1:end end]);
     datau = av2(datau')';
@@ -215,13 +218,12 @@ switch var
     datav = av2(datav);
     data = abs(datau+sqrt(-1)*datav);
     depstr =  ' at bottom ';
-    % var = 'bustr'; % for time handling
+    % var = 'bustr'; % for time handling  
   case 'wind'
     datau = squeeze(nc_varget(file,'Uwind',START,COUNT));
     datav = squeeze(nc_varget(file,'Vwind',START,COUNT));
     data = abs(datau+sqrt(-1)*datav);
     depstr =  ' 10 m above surface ';
-    % var = 'Uwind'; % for time handling
   case 'umag'
     datau = squeeze(nc_varget(file,'u',START,COUNT));   
     datau(isnan(datau)==1) = 0; 
@@ -233,7 +235,6 @@ switch var
     datav = av2(datav);
     data = abs(datau+sqrt(-1)*datav);
     depstr = [ ' at level ' int2str(k) ' '];
-    % var = 'temp'; % for time handling
   case 'rvor'
     datau = squeeze(nc_varget(file,'u',START,COUNT)); 
     % datau(isnan(datau)) = 0; 
@@ -254,6 +255,11 @@ switch var
     press = -grd.z_r(k,:,:);
     data = roms_co2sys_var(lower(var),temp,salt,alk,tic,press); 
     data = squeeze(data);
+  case 'swflux'
+    ssflux = nc_varget(file,'ssflux',START,COUNT);
+    sss = nc_varget(file,'salt',[START(1) grd.N-1 START(2:3)],...
+      [COUNT(1) 1 COUNT(2:3)]);
+    data = 1000*ssflux./sss; % rhow*saltflux/salt in units kg m-2 s-1
   otherwise
     data = squeeze(nc_varget(file,var,START,COUNT));
     try
@@ -317,10 +323,6 @@ if isfield(grd,'special')
     opt = char(vlist{k});
     switch char(opt)
       case 'jormask'
-        %           for opt = vlist
-        %     opt = char
-        %     switch char(opt)
-        %       case 'jormask'
         % apply Jay O'Reilly's mask to trim the plotted nena data
         xpoly = [-82 -79.9422 -55.3695 -55.3695 -82];
         ypoly = [24.6475 24.6475 44.0970 46 46];
@@ -381,14 +383,13 @@ if nargin > 5
       v = nc_varget(file,'v',START,COUNT);
       depstr = [depstr ' Vectors at level ' int2str(k) ' '];
     else
-      u = nc_varget(file,'ubar',START,COUNT);
-      v = nc_varget(file,'vbar',START,COUNT);
-      % a forcing file won't have u,v ...
-      if isempty(u)
+      if strcmp(var,'stress')
         u = nc_varget(file,'sustr',START,COUNT);
         v = nc_varget(file,'svstr',START,COUNT);
         depstr = [depstr ' Wind stress vectors '];
       else
+        u = nc_varget(file,'ubar',START,COUNT);
+        v = nc_varget(file,'vbar',START,COUNT);
         depstr = [depstr ' Depth average velocity vectors '];
       end
     end
@@ -524,3 +525,4 @@ if m == 1
 else
 	a = 0.5 * (a(2:m,:) + a(1:m-1,:));
 end
+ff
