@@ -233,9 +233,23 @@ for v = vlist
       tdew  = E.d2.data;          % 2m dewpoint
       tsur  = tsur - 273.15;
       tdew  = tdew - 273.15;
-      VP   = 6.11 .* 10.0 .^ (7.5 .* tdew ./ (237.7 + tdew));
-      VPsat = 6.11 .* 10.0 .^ (7.5 .* tsur ./ (237.7 + tsur));
-      field = 100.0 .* (VP ./ VPsat);
+      
+      % Old code (Paul Goodman)      
+      % VP   = 6.11 .* 10.0 .^ (7.5 .* tdew ./ (237.7 + tdew));
+      % VPsat = 6.11 .* 10.0 .^ (7.5 .* tsur ./ (237.7 + tsur));
+      % field = 100.0 .* (VP ./ VPsat);
+      
+      % New code 
+      % Annex 4.B of "Guide to Instruments and Methods of Observation
+      % Volume I: Measurement of Meteorological Variables", WMO No. 8, 2018 
+      % https://library.wmo.int/index.php?lvl=notice_display&id=12407#.XiGSwf5KiUk
+      % The adjustment for air pressure is not needed in the ratio for RH.
+      
+      % Saturation vapor pressure at dew point and surface temperature
+      vpdew = 6.112 * exp( 17.62*tdew ./ (243.12+tdew));
+      vp2m  = 6.112 * exp( 17.62*tsur ./ (243.12+tsur));
+      field = 100.0 * vpdew./vp2m;  
+      
       S.Variables(5).Attributes(ilname).Value = ...
         'surface air relative humidity at 2 m';
     case 'Pair'
