@@ -10,7 +10,7 @@ function h = roms_plot_mesh(g,varargin)
 %         - vector assumed to be a RGB color
 %   cgrid - string to specify which mesh to plot
 %         'psi' (DEFAULT) or 'rho' mesh from respective points
-%         'edge' or 'boundary' or 'perim' = perimeter of domain
+%         'edge' or 'boundary' = perimeter of domain
 %         'coast' = discrete land/sea boundary
 %         'wet' = discrete land/sea boundary from wet/dry mask - must have
 %                       loaded wet/dry masks with roms_get_grid(f,f,tindex)
