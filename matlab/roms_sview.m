@@ -41,7 +41,11 @@ function [thedata,thegrid,han] = roms_sview(file,var,time,k,grd,vec_d,uscale,var
 %
 % If wet/dry masks are present in the output file, then they will be 
 % applied to the plot if this preference is set:
-%      setpref('ROMS_WILKIN','USE_WETDRY_MASK',true);
+%      setpref('ROMS_WILKIN','USE_WETDRY_MASK',true)
+%
+% Default is to scale plot aspect ratio by cosine(latitude) to make it
+%      appear approximately "Mercator-ish". To disable this, add the field
+%      'merc' to the grd and make it false, i.e. grd.merc = false;
 %
 % Requesting plots of special variables not actually in the file
 %       varname = ...
@@ -54,16 +58,19 @@ function [thedata,thegrid,han] = roms_sview(file,var,time,k,grd,vec_d,uscale,var
 %            'stress' or 'bstress' plot the magnitude of the surface or
 %               bottom stress, respectively
 %            'rvor' plot relative velocity
+%            'rvorbar' plot relative velocity of ubar,vbar
 %            'ow' plot Okubo-Weiss parameter
 %            'wind' plot the magnitude of vector (Uwind,Vwind) as from a
 %               forcing file; both components must be in the same file 
 %               and on the ROMS rho-points grid (no regrid option) 
 %            'omegaca','omegaar','ph','phtotal' use CO2SYS to compute
-%            constituents of the ocean carbon state - alkalinity, TIC must
-%            be present in the ROMS file from the Fennel/BGC model
+%               constituents of the ocean carbon state - alkalinity, TIC
+%               must be present in the ROMS file from the Fennel/BGC model
 %            'swflux' plots the surface freshwater flux inferred from the
-%            output SSFLUX (PSU m s-1) converted to kg m-2 s-1 using the
-%            saved surface salinity and rho_water = 1000
+%               output SSFLUX (PSU m s-1) converted to kg m-2 s-1 using the
+%               saved surface salinity and rho_water = 1000
+%            'ohc' ocean heat content (see help roms_ohc)
+%            'mld' mixed layer depth (see help roms_mld)
 %
 % Outputs:
 % 
@@ -149,7 +156,7 @@ end
 % figure out whether a 2-D or 3-D variable by testing the dimensions of the
 % variable
 switch var
-  case {'ubarmag','vbarmag'}
+  case {'ubarmag','vbarmag','rvorbar'}
     vartest = 'ubar';
   case 'stress'
     vartest = 'sustr';
@@ -163,6 +170,8 @@ switch var
     vartest = 'u';
   case {'omegaca','OmegaCa','omegaar','OmegaAr','ph','phtotal'}
     vartest = 'salt';
+  case {'mld','ohc'}
+    vartest = 'temp';
   otherwise
     vartest = var;
 end
@@ -241,6 +250,12 @@ switch var
     datav = squeeze(nc_varget(file,'v',START,COUNT));
     % datav(isnan(datav)) = 0;
     data = roms_vorticity(datau,datav,grd,'relative');
+  case 'rvorbar'
+    datau = squeeze(nc_varget(file,'ubar',START,COUNT)); 
+    % datau(isnan(datau)) = 0; 
+    datav = squeeze(nc_varget(file,'vbar',START,COUNT));
+    % datav(isnan(datav)) = 0;
+    data = roms_vorticity(datau,datav,grd,'relative');
   case 'ow'
     datau = squeeze(nc_varget(file,'u',START,COUNT)); 
     % datau(isnan(datau)) = 0; 
@@ -260,6 +275,10 @@ switch var
     sss = nc_varget(file,'salt',[START(1) grd.N-1 START(2:3)],...
       [COUNT(1) 1 COUNT(2:3)]);
     data = 1000*ssflux./sss; % rhow*saltflux/salt in units kg m-2 s-1
+  case 'ohc'
+    data = roms_ohc(file,time,grd);
+  case 'mld'
+    data = roms_mld(file,time,grd);
   otherwise
     data = squeeze(nc_varget(file,var,START,COUNT));
     try

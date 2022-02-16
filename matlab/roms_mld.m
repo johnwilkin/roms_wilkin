@@ -3,6 +3,8 @@ function mld = roms_mld(file,time,grd,opt)
 % Plot Mixed Layer Depth (MLD) from a ROMS  history or averages file
 %     or THREDDS aggregation
 %
+% Depth where density is 0.125 kg/m3 greater than rho(z=-10 m) 
+%
 % John Wilkin jwilkin@rutgers.edu
 %
 % Copyright (c) 2021 - John L. Wilkin - jwilkin@rutgers.edu
