@@ -50,6 +50,10 @@ function [thedata,thegrid,han] = roms_zview(file,var,time,depth,grd,vec_d,uscale
 % applied to the plot if this preference is set:
 %      setpref('ROMS_WILKIN','USE_WETDRY_MASK',true);
 %
+% Default is to scale plot aspect ratio by cosine(latitude) to make it
+%      appear approximately "Mercator-ish". To disable this, add the field
+%      'merc' to the grd and make it false, i.e. grd.merc = false;
+%
 % Requesting plots of special variables not actually in the file
 %       varname = ...
 %            'Chlorophyll' with a captial C plots chlorophyll log
@@ -61,13 +65,12 @@ function [thedata,thegrid,han] = roms_zview(file,var,time,depth,grd,vec_d,uscale
 %            'stress' or 'bstress' plot the magnitude of the surface or
 %               bottom stress, respectively
 %            'rvor' plot relative velocity
-%            'ow' plot Okubo-Weiss parameter
 %            'wind' plot the magnitude of vector (Uwind,Vwind) as from a
 %               forcing file; both components must be in the same file 
 %               and on the ROMS rho-points grid (no regrid option) 
 %            'omegaca','omegaar','ph','phtotal' use CO2SYS to compute
-%            constituents of the ocean carbon state - alkalinity, TIC must
-%            be present in the ROMS file from the Fennel/BGC model
+%               constituents of the ocean carbon state - alkalinity, TIC
+%               must be present in the ROMS file from the Fennel/BGC model
 %
 % Outputs:
 %
