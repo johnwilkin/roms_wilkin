@@ -22,6 +22,13 @@ function E = roms_get_era5_NCARds633_bulkflux(yyyy,mm,bbox,varargin)
 %     net shortwave radiation (if the user wants to #define SOLAR_SOURCE), 
 %     and freshwater flux (kg m^-2 s^-1) from ERA5 rain and evaporation.
 %
+%     Note: Be careful forcing ROMS with imposed stresses in coastal
+%     applications. ERA5 has a fractional land/sea mask, and points near
+%     the coast may have stresses that are more indicative of coonditions
+%     on the adjacent land that over water, i.e. much stronger. The bulk
+%     fluxes option doesn't have this problem because it uses a drag 
+%     coefficient suited to the ocean, not rough terrain. 
+%
 % Guidance on variables in ERA5 collections:
 % e5.oper.an.sfc Surface analysis 
 % https://rda.ucar.edu/datasets/ds633.0/docs/ds633.0.e5.oper.an.sfc.grib1.table.web.txt
@@ -73,7 +80,7 @@ function E = roms_get_era5_NCARds633_bulkflux(yyyy,mm,bbox,varargin)
 %     enter your username or password string to find out how to URL 
 %     encode them to build username:password string. But DON'T URL encode
 %     the colon - that will throw an error. 
-%     If userpass is not given, the funciotn endeavors to parse them from
+%     If userpass is not given, the function endeavors to parse them from
 %     your .netrc file
 %
 %   fluxopt (string) - controls variables read from ERA5 for depending
@@ -392,8 +399,10 @@ for vname = ecmwf_vars
   % as negative values
   if all(bbox(1:2)<0)
     lon = ncread(url,'longitude')-360;
+    minus360 = true;
   elseif all(bbox(1:2)>0)
     lon = ncread(url,'longitude');
+    minus360 = false;
   else
     error('Requested longitude range straddles the prime meridian')
   end
@@ -406,7 +415,10 @@ for vname = ecmwf_vars
   Je = find(lat>=bbox(3),1,'last');
   Jlen = Je-Js;
   
-  lon = ncread(url,'longitude',Is,Ilen)-360;
+  lon = ncread(url,'longitude',Is,Ilen);
+  if minus360
+    lon = lon-360;
+  end
   lat = ncread(url,'latitude',Js,Jlen);
   lat = flip(lat);
  
@@ -450,8 +462,8 @@ for vname = ecmwf_vars
             
             % Get the full 16 days
             % I have tested getting this in smaller chunks, but the fastest
-            % method is a single query loading all initial times and forecast
-            % hours at once.
+            % method is a single query loading all initial times and 
+            % forecast hours at once.
             itime = double(ncread(url,'forecast_initial_time'))/24 + epoch;
             ni = length(itime);
             fhour = double(ncread(url,'forecast_hour'))/24;
@@ -484,7 +496,7 @@ for vname = ecmwf_vars
             toc
             
             % Trim off the extra 7 hours that are from the next month so
-            % data ends at 23:00 and there is no duplication of timne in a
+            % data ends at 23:00 and there is no duplication of time in a
             % multifile sequence
             time(end+(-6:0)) = [];
             data(:,:,end+(-6:0)) = [];
@@ -562,11 +574,10 @@ E.citation = [ ...
 
 function index = findstrinstruct(S,field,string)
 % find INDEX into a structure S for which S.FIELD matches STRING
-% from roms_wilkin toolbox
 index = find(arrayfun(@(n) strcmp(S(n).(field),string), 1:numel(S)));
 
 function userpass = userpass_from_netrc
-% attempt to parse username:password for rad.ucar./edu from .netrc
+% attempt to parse username:password for rad.ucar.edu from .netrc
 [~,HOME] = system('echo $HOME');
 fid = fopen(fullfile(strip(HOME),'.netrc'));
 while 1  

@@ -76,33 +76,28 @@ if length(size(c))>2
   c = squeeze(c);
 end
 
-% Changes to nc_varget (from snctools) in versions after January 2009 (?) return
-% data of the same TYPE as in the actual netcdf file, e.g. FLOAT or DOUBLE or INT.
-% Previously data were always converted to DOUBLE. 
-% PCOLOR requires DOUBLE type data, so we trap this possibility internaly here
-% by simply forcing a type conversion (even if it's not required).
-if 0 % I don't think this is required anymore (2009-10-08 JW)
-x = double(x);
-y = double(y);
-c = double(c);
-end
-
 % At this point, x,y and c should all have the same dimension, but
 % sometimes c is transposed because of user dyslexia about
 % row-column indexing
 %
 % Trap the case that c needs to be transposed, warn the user, and
 % proceed.
-if ~all([size(x)-size(c)]==0)
+if ~all((size(x)-size(c))==0)
   % size don't match
-  if all([size(x)-size(c')]==0)
+  if all((size(x)-size(c'))==0)
     % then transposing fixes things
     c = c';
-    warning([ 'Input C is being transposed to match X,Y'])
+    warning( 'Input C is being transposed to match X,Y')
   end
 end
 
-[m n] = size(x);
+datenum_to_datetime = false;
+if isdatetime(x)
+  datenum_to_datetime = true;
+  x = datenum(x);
+end
+
+[m,n] = size(x);
 x = [ x(:,1)  0.5*(x(:,1:n-1) + x(:,2:n))  x(:,n)];
 y = [ y(:,1)  0.5*(y(:,1:n-1) + y(:,2:n))  y(:,n)];
 x = [ x(1,:); 0.5*(x(1:m-1,:) + x(2:m,:)); x(m,:)];
@@ -113,6 +108,10 @@ hh = surface(x,y,zeros(size(c)),c);
 lims = [min(min(x)) max(max(x)) min(min(y)) max(max(y))];
 
 set(hh,'edgecolor','none','facecolor','flat')
+
+if datenum_to_datetime
+  x = datetime(x,'ConvertFrom','datenum');
+end
 
 if ~hold_state
   set(cax,'View',[0 90]);

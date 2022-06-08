@@ -3,14 +3,14 @@ function out = roms_vorticity(u,v,g,vortype)
 % compute relative vorticity
 %
 % Options:
-%   vortype = 'relative' 
+%   vortype = 'relative'
 %   vortype = 'okubo-weiss'
 %   vortype = 'potential' is not supported at present
 %
 % Output is on psi points grid
 %
 % -------------------------------------------------------------------------
-% !  From ROMS vorticity.F 
+% !  From ROMS vorticity.F
 % !  This routine computes relative (s-1) and  potential (m-1 s-1)       !
 % !  vorticity for an adiabatic Boussinesq fluid where the potential     !
 % !  density is conserved:                                               !
@@ -54,9 +54,9 @@ switch vortype(1)
     uom = 2*u./(g.pm(:,1:(end-1))+g.pm(:,2:end));
     mn_p = 0.0625*...
       (g.pm(1:(end-1),1:(end-1))+g.pm(1:(end-1),2:end)+...
-       g.pm(2:end,1:(end-1))+g.pm(2:end,2:end)).*...
+      g.pm(2:end,1:(end-1))+g.pm(2:end,2:end)).*...
       (g.pn(1:(end-1),1:(end-1))+g.pn(1:(end-1),2:end)+...
-       g.pn(2:end,1:(end-1))+g.pn(2:end,2:end));
+      g.pn(2:end,1:(end-1))+g.pn(2:end,2:end));
     xi_p = mn_p.*(von(:,2:end)-von(:,1:(end-1))-uom(2:end,:)+uom(1:(end-1),:));
     out = xi_p;
     
@@ -81,11 +81,11 @@ switch vortype(1)
     gam = av2(av2(gam')');
     % pad to correct dimension with NaNs at edges
     gam = 0.5*g.pm.*g.pn.*gam([1 1:end end],[1 1:end end]);
-
+    
     % delta terms
     vom = 2*v./(g.pm(1:(end-1),:)+g.pm(2:end,:));
     uon = 2*u./(g.pn(:,1:(end-1))+g.pn(:,2:end));
-  
+    
     % delta1 du/dx
     d1 = uon(:,2:end)-uon(:,1:end-1);
     d1 = g.pm.*g.pn.*d1(:,[1 1:end end]);
@@ -93,13 +93,37 @@ switch vortype(1)
     % delta2 dv/dy
     d2 = vom(2:end,:)-vom(1:end-1,:);
     d2 = g.pm.*g.pn.*d2([1 1:end end],:);
-  
+    
     out = 0.25*(d1-d2).^2 + gam.^2 - xi.^2;
     
   case 'p'
     
-    error('this function does not compute potential vorticity')
+    error('this function does not yet compute potential vorticity')
     
+    rho0 = 1025;
+    
+    % m times n at psi points
+    mn_p = 0.0625*...
+      (g.pm(1:(end-1),1:(end-1))+g.pm(1:(end-1),2:end)+...
+      g.pm(2:end,1:(end-1))+g.pm(2:end,2:end)).*...
+      (g.pn(1:(end-1),1:(end-1))+g.pn(1:(end-1),2:end)+...
+      g.pn(2:end,1:(end-1))+g.pn(2:end,2:end));
+    
+    % f at psi points
+    f_p = 0.0625*(g.f(1:(end-1),1:(end-1))+g.f(1:(end-1),2:end)+...
+      g.f(2:end,1:(end-1))+g.f(2:end,2:end));
+    
+    % d(v/n)/d(xi) - d(u/m)/d(eta)
+    von = 2*v./(g.pn(1:(end-1),:)+g.pn(2:end,:));
+    uom = 2*u./(g.pm(:,1:(end-1))+g.pm(:,2:end));
+    
+    % [f/mn + d(v/n)/d(xi) - d(u/m)/d(eta)]
+    fpz = f_p./mn_p+(von(:,2:end)-von(:,1:(end-1))-...
+      uom(2:end,:)+uom(1:(end-1),:));
+    
+    % d(pden)/d(z)
+    
+    % out = xi_p + f_p;
 end
 
 function [u,v] = uv2rho(u,v)

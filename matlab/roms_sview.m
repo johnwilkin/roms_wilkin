@@ -209,21 +209,21 @@ switch var
     depstr =  ' depth average ';
     % var = 'ubar'; % for time handling
   case 'stress'
-    datau = squeeze(nc_varget(file,'sustr',START,COUNT));
-    datau = datau(:,[1 1:end end]);
+    sustr = squeeze(nc_varget(file,'sustr',START,COUNT));
+    datau = sustr(:,[1 1:end end]);
     datau = av2(datau')';
-    datav = squeeze(nc_varget(file,'svstr',START,COUNT));
-    datav = datav([1 1:end end],:);
+    svstr = squeeze(nc_varget(file,'svstr',START,COUNT));
+    datav = svstr([1 1:end end],:);
     datav = av2(datav);
     data = abs(datau+sqrt(-1)*datav);
     depstr =  ' at surface ';
     % var = 'sustr'; % for time handling
   case 'bstress'
-    datau = squeeze(nc_varget(file,'bustr',START,COUNT));
-    datau = datau(:,[1 1:end end]);
+    bustr = squeeze(nc_varget(file,'bustr',START,COUNT));
+    datau = bustr(:,[1 1:end end]);
     datau = av2(datau')';
-    datav = squeeze(nc_varget(file,'bvstr',START,COUNT));
-    datav = datav([1 1:end end],:);
+    bvstr = squeeze(nc_varget(file,'bvstr',START,COUNT));
+    datav = bvstr([1 1:end end],:);
     datav = av2(datav);
     data = abs(datau+sqrt(-1)*datav);
     depstr =  ' at bottom ';
@@ -392,7 +392,8 @@ if nargin > 5
     % add vectors
     % ! sorry, this doesn't allow for {u,v}bar vectors on a 3d variable
     if k > 0
-      if numel(START)<4 % field was 2D but k>0 wants 3D velocity
+      if numel(START)<4 
+        % pcolorw field was 2D but k>0 wants 3D velocity on s-surface
         START = START([1 1 2 3]);
         START(2) = k-1;
         COUNT = COUNT([1 1 2 3]);
@@ -403,9 +404,13 @@ if nargin > 5
       depstr = [depstr ' Vectors at level ' int2str(k) ' '];
     else
       if strcmp(var,'stress')
-        u = nc_varget(file,'sustr',START,COUNT);
-        v = nc_varget(file,'svstr',START,COUNT);
+        u = sustr;
+        v = svstr;
         depstr = [depstr ' Wind stress vectors '];
+      elseif strcmp(var,'bstress')
+        u = bustr;
+        v = vvstr;
+        depstr = [depstr ' Bottom stress vectors '];
       else
         u = nc_varget(file,'ubar',START,COUNT);
         v = nc_varget(file,'vbar',START,COUNT);
