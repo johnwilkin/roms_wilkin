@@ -8,7 +8,7 @@ function [cpp1,cpp2] = roms_cpplist(file,file2)
 % Copyright (c) 2021 - John L. Wilkin - jwilkin@rutgers.edu
 % $Id$
 
-cpp = nc_attget(file,nc_global,'CPP_options');
+cpp = ncreadatt(file,'/','CPP_options');
 c = strfind(cpp,',');
 c = [1 c];
 clear s

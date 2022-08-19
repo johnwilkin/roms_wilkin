@@ -235,11 +235,11 @@ switch var
     depstr =  ' 10 m above surface ';
   case 'umag'
     datau = squeeze(nc_varget(file,'u',START,COUNT));   
-    datau(isnan(datau)==1) = 0; 
+    datau(isnan(datau)) = 0; 
     datau = datau(:,[1 1:end end]);
     datau = av2(datau')';   
     datav = squeeze(nc_varget(file,'v',START,COUNT));
-    datav(isnan(datav)==1) = 0;
+    datav(isnan(datav)) = 0;
     datav = datav([1 1:end end],:);
     datav = av2(datav);
     data = abs(datau+sqrt(-1)*datav);
