@@ -141,7 +141,7 @@ switch xcoord
     title(titlestr)
   otherwise
     % hack to skip the plot and only return the data to use with the
-    % multiple boundary plot roms_bviewm.m
+    % multiple boundary plot roms_bviews.m
 end
 
 if nargout > 0

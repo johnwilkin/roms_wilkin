@@ -64,6 +64,7 @@ switch cgrid(1)
     
   case 'p' % psi points DEFAULT
     % if you want to trim the plotted mesh then tinker with these masks
+    % This is how I trimmed the mesh plotted in the DBOFS figure for ETOOFS
     m = ones(size(g.mask_psi));
     if 0
       m = g.mask_psi;

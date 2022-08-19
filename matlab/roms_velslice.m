@@ -56,6 +56,8 @@ function [vel,coord] = roms_velslice(file,uname,vname,varargin)
 % This code was re-written 08-Jul-2016 - there were errors in the 
 % along/across-track rotation math. 
 % Versions of roms_velslice older than 2016 SHOULD BE DELETED. 
+%
+% Copyright (c) 2021 - John L. Wilkin - jwilkin@rutgers.edu 
 
 % u,v in native ROMS coordinate directions along the track
 [Tu,Coordu] = roms_genslice(file,uname,varargin{:});
