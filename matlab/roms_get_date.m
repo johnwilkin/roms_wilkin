@@ -30,15 +30,20 @@ if nargin < 3
   basedate = NaN;
 end
 
+
 if nargin < 4
-  if nc_isvar(file,'ocean_time')
+  I = ncinfo(file);
+  if ~isempty(findstrinstruct(I.Variables,'Name','ocean_time'))
+  % if nc_isvar(file,'ocean_time')
     % for most roms output
     timevarname = 'ocean_time';
-    if nc_isvar(file,'time')
-      % if both ocean_time and time then probably a fmrc
+    if ~isempty(findstrinstruct(I.Variables,'Name','time'))
+    % if nc_isvar(file,'time')
+      % both ocean_time and time present then probably a FMRC
       timevarname = 'time';
     end
-  elseif nc_isvar(file,'time')
+  elseif ~isempty(findstrinstruct(I.Variables,'Name','time'))
+  % elseif nc_isvar(file,'time')
     % probably fmrc
     timevarname = 'time';
   else

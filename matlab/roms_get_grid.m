@@ -89,9 +89,11 @@ else
       end
     end
   end
-  
+ 
+  I = ncinfo(grd_file);
   varlist = {'x_rho','y_rho','x_u','y_u','x_v','y_v','x_psi','y_psi'};
-  if nc_isvar(grd_file,'x_rho')
+% if nc_isvar(grd_file,'x_rho')
+  if ~isempty(findstrinstruct(I.Variables,'Name','x_rho'))
     for v = varlist
       vname = char(v);
       try
@@ -153,7 +155,8 @@ else
   varlist = {'rdrag','rdrag2','ZoBot'};
   for v = varlist
     vname = char(v);
-    if nc_isvar(grd_file,vname)
+    % if nc_isvar(grd_file,vname)
+    if ~isempty(findstrinstruct(I.Variables,'Name',vname))
       tmp = nc_varget(grd_file,vname);
       grd.(vname) = tmp;
     end
@@ -185,7 +188,8 @@ else
   if nargin > 2
     if length(tindex)==1 && tindex~=0
       % possibly get the appropriate land/sea or wet/dry mask for this time
-      haswetdry = nc_isvar(grd_file,'wetdry_mask_rho');
+      % haswetdry = nc_isvar(grd_file,'wetdry_mask_rho');
+      haswetdry = ~isempty(findstrinstruct(I.Variables,'Name','wetdry_mask_rho'));
       if haswetdry % wet dry mask exists in file
         try % override with preference
           usewetdry = getpref('ROMS_WILKIN','USE_WETDRY_MASK');
@@ -407,13 +411,16 @@ if ischar(scoord)
   catch
     Tcline = hc;
   end
+  I = ncinfo(scoord);
   N = length(ncread(scoord,'Cs_r'));
-  if nc_isvar(scoord,'Vtransform')
+  % if nc_isvar(scoord,'Vtransform')
+  if ~isempty(findstrinstruct(I.Variables,'Name','Vtransform'))
     Vtransform = ncread(scoord,'Vtransform');
   else
     Vtransform = 1;
   end
-  if nc_isvar(scoord,'Vstretching')
+  % if nc_isvar(scoord,'Vstretching')
+  if ~isempty(findstrinstruct(I.Variables,'Name','Vstretching'))
     Vstretching = ncread(scoord,'Vstretching');
   else
     Vstretching = 1;
