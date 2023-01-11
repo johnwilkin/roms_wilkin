@@ -290,7 +290,9 @@ end
 
 %% get the appropriate land/sea or wet/dry mask
 usewetdry = false;
-haswetdry = nc_isvar(file,'wetdry_mask_rho');
+% haswetdry = nc_isvar(file,'wetdry_mask_rho');
+I = ncinfo(file);
+haswetdry = ~isempty(findstrinstruct(I.Variables,'Name','wetdry_mask_rho'));
 if haswetdry % wet dry mask exists in file
   try % override with preference
     usewetdry = getpref('ROMS_WILKIN','USE_WETDRY_MASK');

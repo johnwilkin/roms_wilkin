@@ -364,8 +364,9 @@ Itrk = F(lonTrk,latTrk);
 % Find track locations that are outside the model grid or available times
 % Flag with valid=NaN. We will skip over these positions but leave NaNs
 % in the output so that the space dimension of inputs and outputs match
-
-if nc_isvar(file,mskname)
+I = ncinfo(file);
+if ~isempty(findstrinstruct(I.Variables,'Name',mskname))
+% if nc_isvar(file,mskname)
   msk_mod = ncread(file,mskname,[Iax(1) Jax(1)],[length(Iax) length(Jax)])';
   msk_mod(msk_mod~=1) = NaN;
   F = scatteredInterpolant(lon_mod(:),lat_mod(:),msk_mod(:),method);

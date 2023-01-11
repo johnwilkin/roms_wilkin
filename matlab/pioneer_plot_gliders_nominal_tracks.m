@@ -111,7 +111,12 @@ if nargout > 0
   Hanglider = hanglider;
 end
 if nargout > 1
-  Hanlegend = hanlegend;
+  if opt
+    Hanlegend = hanlegend;
+  else
+    Hanlegend = NaN;
+  end
 end
+
 
 
