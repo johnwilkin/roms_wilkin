@@ -41,9 +41,8 @@ Tname = 'time'; % need to reset some parameters from roms_metadata
 YYYYMMDD = datestr(E.time(1),'yyyymm');
 
 % Output file name prefix
-ROMS_APP = 'watl'; % ROMS_APP = 'MYAPPLICATION'
+ROMS_APP = 'MYAPPLICATION';
 % Output path. If not set data are written to the working directory.
-Outdir = '/Volumes/home/om/roms/watl';
 ncname = strcat('frc_',ROMS_APP,'_GFS_bulkflux_',YYYYMMDD,'.nc');
 if ~exist('Outdir','var')
   Outdir = pwd;
@@ -169,6 +168,7 @@ nc_write(Outfile,'lat',lat);
 % Process a list of ROMS forcing variables
 
 vlist = roms_varlist('bulkflux');
+vlist = romsvname
 first = true;
 
 for v = vlist
