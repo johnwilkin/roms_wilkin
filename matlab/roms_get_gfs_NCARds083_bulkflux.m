@@ -1,31 +1,15 @@
-function G = roms_get_gfs_NCARds083_bulkflux(romsvname,outcoords,userpass)
-% E = roms_get_gfs_NCARds083_bulkflux(romsvname,outcoords,userpass)
+function G = roms_get_gfs_NCARds083_bulkflux(romsvname,outcoords)
+% E = roms_get_gfs_NCARds083_bulkflux(romsvname,outcoords)
 %
-% Read GFS data via OPeNDAP from NCAR ds083.3 (0.25 deg lon/lat 3-hourly
-% data) and interpolate to requested lon/lat grid and time range.
+% Read GFS data via OPeNDAP from NCAR ds083.3 (0.25 deg lon/lat 3-hourly)
 %
 % Inputs:
 %
 %   ROMSVNAME - ROMS forcing variable name(s) to process as a cell array
-%     selection {'Pair,'Tair'}, a single variable string 'Pair'
-%     or the string 'all' to do them all
+%     selection {'Pair,'Tair'} such as the list returned by 
+%     romsvname = romsvname = roms_varlist('bulkflux')
 %   OUTCOORDS - a structure with target coordinates named lon, lat
-%     and t (2-element vector start/end datetime)
-%   USERPASS (string) - RDA authentication in the format:
-%     'username:password' (notice the colon between username and password)
-%     This string augments the OPeNDAP data URL thus:
-%     url = 'https://username:password@rda.ucar.edu/thredds/dodsC/...
-%                    ^^^^^^^^^^^^^^^^^
-%     If your username or password includes text that would be interpretted
-%     by the http protocol it must be URL encoded. In particular, since it
-%     is common practise to use an email address as RDA username, the @
-%     must be encoded as %40, e.g. my username and password would be
-%     userpass = 'jwilkin%40rutgers.edu:mypassword' (not my real password!)
-%     If you need help on this conversion, go to:
-%     https://www.w3schools.com/tags/ref_urlencode.ASP
-%     and enter your username or password string to find out how to URL
-%     encode them to build the username:password string. DON'T URL encode
-%     the colon - that will throw an error
+%     and t (2-element vector start/end in MATLAB datetime format)
 %
 % John Wilkin - May 2021
 %
@@ -36,22 +20,10 @@ function G = roms_get_gfs_NCARds083_bulkflux(romsvname,outcoords,userpass)
 %
 % See also roms_write_gfs025_NCARds083_frcfile
 
-% ERA5 analysis is username/password restricted
-if nargin < 3
-  try
-    userpass = userpass_from_netrc;
-    disp('Using username:password for rda.ucar.edu from $HOME/.netrc')
-  catch
-    disp(['Unsuccessful parsing username and password credentials' ...
-      'for rda.ucar.edu from .netrc']);
-    error('Try giving userpass string as input to this function')
-  end
-end
-dataurl = fullfile('https://USERPASS@rda.ucar.edu',...
-  'thredds/dodsC/aggregations/g/ds083.3/1/Best');
-dataurl = strrep(dataurl,'USERPASS',userpass);
+% GFS is unrestricted (does not require user/pass authentication like ERA5)
+dataurl = 'https://rda.ucar.edu/thredds/dodsC/aggregations/g/ds083.3/1/Best';
 
-%% determine which WRF variables to process for ROMS
+%% determine which variables to process for ROMS
 
 % vars.atmos_name   = {'Temperature_height_above_ground',...
 %   'Relative_humidity_height_above_ground',...
@@ -152,7 +124,7 @@ G.I = U;
 %% weather model coordinates
 
 % Define bounding box [west east south north] that encompasses the target
-% grid (slightly inflated by lp)
+% grid 
 lp = 0.75;
 bbox = [min(lon(:)) max(lon(:)) min(lat(:)) max(lat(:))] + lp*[-1 1 -1 1];
 
@@ -174,7 +146,6 @@ J = find(y>=bbox(3) & y<=bbox(4));
 % data is arranged from north to south so flip latitudes to get ascending
 % inputs for griddedInterpolant (no need to flip lon)
 lat_atmos = flip(lat_atmos,2);
-
 
 %% Process the list of requested ROMS met forcing variables
 
@@ -263,6 +234,7 @@ for k = 1:length(romsvname)
   data_atmos = squeeze(double(data_atmos));
   data_atmos = flip(data_atmos,2); % to match new ascending order for latitude
   
+  % REGRID to taerget coordinates
   first = true; % first time index for this variable
   for tn = 1:length(tindex)
     if first
