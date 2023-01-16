@@ -207,6 +207,7 @@ for k = 1:length(romsvname)
     disp(['   Reading ' aname{2}])
     up = ncread(dataurl,aname{2},start,count);
     data_atmos = down-up;
+    warning('swrad and lwrad might be 3- & 6-hr avgs in need of unpacking')
   else
     disp(['   Reading ' aname])
     data_atmos = ncread(dataurl,aname,start,count);
@@ -234,7 +235,7 @@ for k = 1:length(romsvname)
   data_atmos = squeeze(double(data_atmos));
   data_atmos = flip(data_atmos,2); % to match new ascending order for latitude
   
-  % REGRID to taerget coordinates
+  % REGRID to target coordinates
   first = true; % first time index for this variable
   for tn = 1:length(tindex)
     if first
