@@ -31,6 +31,11 @@
 
 % USER SETS PARAMETERS IN THIS BLOCK
 
+% Usually the lit of variables is the same list used when the function 
+% roms_get_gfs_NCARds083_bulkflux(romsvname,outcoords) was called to load 
+% the data structure E
+vlist = romsvname;
+
 % shift time to the ROMS basedate you want to use
 Time0 = datetime(2011,1,1);
 time = E.time - Time0; % this is a datetime duration
@@ -166,9 +171,6 @@ nc_write(Outfile,'lat',lat);
 
 % ---------------------------
 % Process a list of ROMS forcing variables
-
-vlist = roms_varlist('bulkflux');
-vlist = romsvname
 first = true;
 
 for v = vlist
@@ -217,10 +219,13 @@ for v = vlist
       field = E.swrad;
       S.Variables(5).Attributes(ilongname).Value = ...
         'net solar shortwave radiation flux';
+      warning('radiation based on avgs might need 1.5 h adjust to time')
     case 'lwrad_down'
       field = E.lwrad_down;
+      warning('radiation based on avgs might need 1.5 h adjust to time')
     case 'lwrad'
       field = E.lwrad;
+      warning('radiation based on avgs might need 1.5 h adjust to time')
     case 'rain'
       field = E.rain;
     otherwise
