@@ -34,9 +34,9 @@ function [vel,coord] = roms_velslice(file,uname,vname,varargin)
 %             string 'verbose' to monitor progress
 % Output:
 %   vel (complex) interpolated vector data along the track
-%             real(vel) along-track (>0 if in direction of travel)
-%             imag(ve;) cross-track (>0 to left of direction of travel)
-%   coord       structure of data coordinates suited to plotting with pcolor
+%               real(vel) along-track (>0 if in direction of travel)
+%               imag(vel) cross-track (>0 to left of direction of travel)
+%   coord     structure of data coordinates suited to plotting with pcolor
 %               lon  2D lon along the track
 %               lat  2D lat along the track
 %               z    2D depth along the track in vertical stretched coords

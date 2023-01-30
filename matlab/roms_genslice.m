@@ -217,6 +217,7 @@ end
 % time coordinate and its units. But this does appear to work with FMRC and
 % recent regular ROMS files
 
+% ***** This code can probably be replaced by the new roms_get_time *******
 try
   % if this is FMRC the coordinate is named time not ocean_time
   tunits = ncreadatt(file,'time','units');
@@ -385,9 +386,11 @@ if verbose
   disp(' ... scatteredInterpolant done')
 end
 
-%% Grid and track metrics are required for across/along track velocity
-%  Not sure how imprecise this method is for setting the grid metrics
-%  on the track
+%%
+% **** Begin computing vectors parallel/normal to track for velslice ******
+% Grid and track metrics are required for across/along track velocity
+% Not sure how imprecise this method is for setting the grid metrics
+% on the track
 
 pm = ncread(file,'pm')';
 pn = ncread(file,'pn')';
@@ -400,9 +403,11 @@ catch
   gotangle = false;
 end
 
-% Can't use F from above because that might be for u or v
+% Can't use object F from above because that might be for u or v
 F = scatteredInterpolant(lonr(:),latr(:),pm(:),method);
 pm = F(lonTrk,latTrk);
+
+% ********** Update this to replace Values and avoid recomputing F ********
 F = scatteredInterpolant(lonr(:),latr(:),pn(:),method);
 pn = F(lonTrk,latTrk);
 if gotangle
@@ -432,6 +437,8 @@ dJon = dJon(:)';
 emag = abs(complex(dIom,dJon));
 ep = complex( dIom,dJon)./emag; % parallel to track
 en = complex(-dJon,dIom)./emag; % normal to track
+
+% ***** End computing vectors parallel/normal to track for velslice *******
 
 %% h for z calculation ----------------------------------------------------
 
