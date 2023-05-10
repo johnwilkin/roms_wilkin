@@ -2,6 +2,7 @@
 % value surface of a ROMS 3-D variable
 %
 % John Wilkin - January 2021
+% updated 2023
 
 % Data URL for the MARACOOS real-time ROMS ocean forecast
 f = 'http://tds.marine.rutgers.edu/thredds/dodsC/roms/doppio/2017_da/avg/Averages_Best';
