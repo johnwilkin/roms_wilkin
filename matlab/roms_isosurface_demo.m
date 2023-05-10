@@ -26,13 +26,16 @@ view(azel)
 xlim([-75 -70]); ylim([37 41.5]); zlim([-100 20]);
 daspect([1 1 100])
 
+title({"Salinity = 33 front in Mid-Atlantic Bight 31-May-2020",...
+  "from Rutgers University MARACOOS Doppio forecast system"})
+
 %% Example 2: The mid summer Cold Pool of the Mid-Atlantic Bight
 figure(2)
 varname = 'temp';
 value = 10;
 
 % make the plot
-tindex = 1281; % 5-April: 10C cold pool has formed
+tindex = 1281; % 5-May-2021: 10C cold pool has formed
 [S,P,H] = roms_isosurface(f,varname,tindex,value,g);
 
 % modify the view point
@@ -42,6 +45,9 @@ view(azel)
 % modify axis limits and aspect ratio
 xlim([-75 -70]); ylim([37 41.5]); zlim([-100 20]);
 daspect([1 1 100])
+
+title({"Temperature = 10^o isosurface in Mid-Atlantic Bight 5-May-2021",...
+  "The T < 10^o Cold Pool has formed"})
 
 %% Example 3: high u-velocity in the Gulf Stream
 figure(3)
@@ -62,4 +68,8 @@ view(azel)
 % modify axis limits and aspect ratio
 zlim([-4000 20]);
 daspect([1 1 500])
+
+title({"u = 0.5 m s^{-1} isosurface 31-May-2020 shows the" ,...
+  "Gulf Stream core and strong tides on Geroges Bank"})
+
 
