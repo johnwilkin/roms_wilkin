@@ -5,7 +5,7 @@ function h = roms_plot_mesh(g,varargin)
 %
 % Options can be in any order, or absent
 %   decimation factor - integer > 0 controls density of mesh (default 10)
-%   color - any 1-character color strong supported by plot command
+%   color - any 1-character color string supported by plot command
 %         - real number < 1 is interpreted as grey scale
 %         - vector assumed to be a RGB color
 %   cgrid - string to specify which mesh to plot
@@ -16,7 +16,6 @@ function h = roms_plot_mesh(g,varargin)
 %                       loaded wet/dry masks with roms_get_grid(f,f,tindex)
 %
 % Copyright (c) 2021 - John L. Wilkin - jwilkin@rutgers.edu
-% $Id: roms_plot_mesh.m 597 2020-12-29 16:48:48Z wilkin $
 
 if nargin==0
   help roms_plot_mesh
@@ -65,7 +64,7 @@ switch cgrid(1)
   case 'p' % psi points DEFAULT
     % if you want to trim the plotted mesh then tinker with these masks
     % This is how I trimmed the mesh plotted in the DBOFS figure for ETOOFS
-    m = ones(size(g.mask_psi));
+    m = ones(size(g.lon_psi));
     if 0
       m = g.mask_psi;
       m(m==0) = NaN;
