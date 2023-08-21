@@ -12,8 +12,9 @@ function h = roms_plot_mesh(g,varargin)
 %         'psi' (DEFAULT) or 'rho' mesh from respective points
 %         'edge' or 'boundary' = perimeter of domain
 %         'coast' = discrete land/sea boundary
-%         'wet' = discrete land/sea boundary from wet/dry mask - must have
-%                       loaded wet/dry masks with roms_get_grid(f,f,tindex)
+%         'wet' =  discrete land/sea boundary from wet/dry mask - must 
+%                  have loaded wet/dry masks with roms_get_grid(f,f,tindex)
+%         'line' = lon_coast,lat_coast in the grid structure
 %
 % Copyright (c) 2021 - John L. Wilkin - jwilkin@rutgers.edu
 
@@ -112,6 +113,9 @@ switch cgrid(1)
     PX = [PXv PXu];
     PY = [PYv PYu];
     han = plot(PX,PY,'k-');
+
+  case 'l'
+    han = plot(g.lon_coast,g.lat_coast,'k-');
     
   otherwise % we presume edge or boundary (i.e. perimeter)
     
