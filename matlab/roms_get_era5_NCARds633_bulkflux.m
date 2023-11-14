@@ -451,25 +451,28 @@ for vname = ecmwf_vars
           
           case 1
             
+            disp('  Reading file 1 of 3 ...  ')
             I = ncinfo(url);
             dim = findstrinstruct(I.Dimensions,...
               'Name','forecast_initial_time');
             Last = I.Dimensions(dim).Length;
             
             % Get last 7 hours 
+            disp('   getting time coordinate ...')
+            fprintf('\b')
             itime = double(ncread(url,'forecast_initial_time',Last,1))/24 ...
               + epoch;
             ni = length(itime);
             fhour = double(ncread(url,'forecast_hour',6,7))/24;
             nf = length(fhour);
             time = repmat(itime',[nf 1])+repmat(fhour,[1 ni]);
-            disp('  Reading file 1 of 3 ...  ')
             tic
+            disp(' getting data ... ')
             data = ncread(url,E.(v).name,[Is Js 6 Last],[Ilen Jlen 7 1]);
             data = flip(data,2);
             fprintf('\b')
             toc
-            
+
             TIME = time(:);
             DATA = data(:,:,:);
             
@@ -479,18 +482,20 @@ for vname = ecmwf_vars
             % I have tested getting this in smaller chunks, but the fastest
             % method is a single query loading all initial times and 
             % forecast hours at once.
+            disp('  Reading file 2 of 3 ...  ')
+            disp('   getting time coordinate ...')
+            fprintf('\b')
             itime = double(ncread(url,'forecast_initial_time'))/24 + epoch;
             ni = length(itime);
             fhour = double(ncread(url,'forecast_hour'))/24;
             nf = length(fhour);
             time = repmat(itime',[nf 1])+repmat(fhour,[1 ni]);
-            disp('   Reading file 2 of 3 ...  ')
             tic
+            disp(' getting data ... ')
             data = ncread(url,E.(v).name,[Is Js 1 1],[Ilen Jlen Inf Inf]);
             data = flip(data,2);
             fprintf('\b')
             toc
-            
             TIME = cat(1,TIME,time(:));
             DATA = cat(3,DATA,data(:,:,:));
             
@@ -498,13 +503,16 @@ for vname = ecmwf_vars
             
             % Get the full 16 days
             % Then trim the extra 6 hours of the next month
+            disp('  Reading file 3 of 3 ...  ')
+            disp('   getting time coordinate ...')
+            fprintf('\b')
             itime = double(ncread(url,'forecast_initial_time'))/24 + epoch;
             ni = length(itime);
             fhour = double(ncread(url,'forecast_hour'))/24;
             nf = length(fhour);
             time = repmat(itime',[nf 1])+repmat(fhour,[1 ni]);
-            disp('    Reading file 3 of 3 ...  ')
             tic
+            disp(' getting data ... ')
             data = ncread(url,E.(v).name,[Is Js 1 1],[Ilen Jlen Inf Inf]);
             data = flip(data,2);
             fprintf('\b')

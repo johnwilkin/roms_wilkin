@@ -92,7 +92,6 @@ else
  
   I = ncinfo(grd_file);
   varlist = {'x_rho','y_rho','x_u','y_u','x_v','y_v','x_psi','y_psi'};
-% if nc_isvar(grd_file,'x_rho')
   if ~isempty(findstrinstruct(I.Variables,'Name','x_rho'))
     for v = varlist
       vname = char(v);
@@ -152,10 +151,10 @@ else
   catch
   end
   
-  varlist = {'rdrag','rdrag2','ZoBot'};
+  varlist = {'rdrag','rdrag2','ZoBot',...
+    'wtype_grid','diff_factor','visc_factor'};
   for v = varlist
     vname = char(v);
-    % if nc_isvar(grd_file,vname)
     if ~isempty(findstrinstruct(I.Variables,'Name',vname))
       tmp = nc_varget(grd_file,vname);
       grd.(vname) = tmp;
@@ -399,7 +398,7 @@ function [theta_s,theta_b,Tcline,N,Vtransform,Vstretching] = ...
   roms_get_scoord(scoord)
 % Parse the s-coordinate parameters
 
-if ischar(scoord)
+if ischar(scoord) || isstring(scoord)
   
   % scoord is a his/avg/rst file name or opendap url
   

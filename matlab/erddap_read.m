@@ -14,7 +14,6 @@ function [DATA,url] = erddap_read(url)
 % John Wilkin - August 2018
 %
 % Copyright (c) 2021 - John L. Wilkin - jwilkin@rutgers.edu
-% $Id: erddap_read.m 549 2020-01-18 23:24:44Z robertson $
 
 % Download to temporary file
 tmpfile = ['tmp_' randstr(10) '.mat'];

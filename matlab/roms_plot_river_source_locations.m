@@ -1,5 +1,5 @@
 function [han,hant,lon,lat] = roms_plot_river_source_locations(file,g,color)
-% [han,hant,lon,lat] = roms_plot_river_source_locations(file,grd,[color])
+% [hansym,hanlab,lon,lat] = roms_plot_river_source_locations(file,grd,[color])
 %
 % Add symbols to an existing plot to show the locations of ROMS river 
 % point sources.
@@ -20,8 +20,11 @@ function [han,hant,lon,lat] = roms_plot_river_source_locations(file,g,color)
 % GRD is a ROMS grid structure computed using roms_get_grid.m
 % COLOR (optional) is the symbol color
 %
-% HAN is graphics handle to the plotted symbols (size number of rivers)
-% HANT is graphics handle labels than number the rivers as in the file
+% Outputs:
+%
+% HANSYM is graphics handle to the plotted symbols (size number of rivers)
+% HANLAB is graphics handle labels than number the rivers as in the file
+% LON, LAT are ROMS gird point coordinates of the river sources 
 %
 % John Wilkin; Sept 28 2014
 %              Updated August 2016 to give more detail

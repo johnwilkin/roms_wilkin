@@ -369,7 +369,7 @@ if isfield(grd,'special')
       case 'logdata'
         % this would be a better place to log transform data before
         % plotting
-        data = max(0.01,data);
+        data = max(1e-5,data);
         data = log10(data);
       case 'say'
         unix(['say ' var]);
