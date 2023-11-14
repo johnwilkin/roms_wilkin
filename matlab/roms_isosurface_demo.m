@@ -47,8 +47,8 @@ view(azel)
 xlim([-75 -70]); ylim([37 41.5]); zlim([-100 20]);
 daspect([1 1 100])
 
-title({"Temperature = 10^o isosurface in Mid-Atlantic Bight 5-May-2021",...
-  "The T < 10^o Cold Pool has formed"})
+title(["Temperature = 10^o isosurface in Mid-Atlantic Bight 5-May-2021",...
+  "The T < 10^o Cold Pool has formed"])
 
 %% Example 3: high u-velocity in the Gulf Stream
 figure(3)

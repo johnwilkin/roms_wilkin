@@ -2,19 +2,20 @@ function [Snew,Pobj,Hobj] = roms_isosurface(file,varname,time,value,g,azel)
 % [S,P,H] = roms_isosurface(file,varname,time,value,grd,azel)
 %
 % Plot an isosurface of a ROMS 3-d variable
-% Presently configured to plot over a rendition of the model bathymetry
 %
 % Inputs:
 %
-% file    = roms his/avg/rst/dia etc netcdf file or THREDDS data URL
-% varname = name of the 3-D ROMS output variable to plot
-% time    = time index into FILE
-% value   = value of the isosurface to render
-
-% grd     = grd structure (from roms_get_grid)
+%    file    = roms his/avg/rst/dia etc netcdf file or THREDDS data URL
+%    varname = name of the 3-D ROMS output variable to plot
+%    time    = time index into FILE
+%              use supporting function roms_find_time_index(file,datetime)
+%    value   = value of the isosurface to render
+%    grd     = grd structure (from roms_get_grid)
+%    azel    = vector [AZ,EL] passed to VIEW to change 3-D viewpoint
 %
-% THIS CODE STILL UNDER DEVELOPMENT. PLAN IS TO GIVE IT CALLING
-% FUNCTIONALITY SIMILAR TO ROMS_ZVIEW AND ROMS_SVIEW ETC. 
+% THIS CODE STILL UNDER DEVELOPMENT. PRESENTLY IT PLOTS OVER THE MODEL
+% BATHYMETRY WHICH SHOULD BE MADE OPTIONAL
+%
 % See roms_isosurface_demo.m for examples on how to use this function.
 %
 % John Wilkin - Jan 2021
@@ -72,11 +73,12 @@ Snew.vertices(:,3) = Fz(S.vertices(:,1),S.vertices(:,2),S.vertices(:,3));
 
 % bathymetry
 hviz = -g.h; % bathymetry needs to be negative to plot correctly
-hviz(g.mask_rho==0) = 10; % make land positive so it will get clipped
+hviz(g.mask_rho==0) = 1; % make land positive so it will get clipped
 Hobj = surf(g.lon_rho,g.lat_rho,hviz,-hviz);
 shading flat
 caxis([-50 300])
-colormap(demcmap(caxis,128,flipud(cmap_land),cmap_haxby))
+ax = gca;
+colormap(ax,demcmap(caxis,128,flipud(cmap_land),cmap_haxby))
 
 % isosurface
 hold on

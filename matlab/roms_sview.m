@@ -172,6 +172,8 @@ switch var
     vartest = 'salt';
   case {'mld','ohc'}
     vartest = 'temp';
+  case {'u_surmag','v_surmag'}
+    vartest = 'u_sur';
   otherwise
     vartest = var;
 end
@@ -208,6 +210,15 @@ switch var
     data = abs(datau+sqrt(-1)*datav);
     depstr =  ' depth average ';
     % var = 'ubar'; % for time handling
+  case {'u_surmag','v_surmag'}
+    datau = squeeze(nc_varget(file,'u_sur',START,COUNT));
+    datau = datau(:,[1 1:end end]);
+    datau = av2(datau')';
+    datav = squeeze(nc_varget(file,'v_sur',START,COUNT));
+    datav = datav([1 1:end end],:);
+    datav = av2(datav);
+    data = abs(datau+sqrt(-1)*datav);
+    depstr =  ' surface ';
   case 'stress'
     sustr = squeeze(nc_varget(file,'sustr',START,COUNT));
     datau = sustr(:,[1 1:end end]);
@@ -358,7 +369,7 @@ if isfield(grd,'special')
       case 'logdata'
         % this would be a better place to log transform data before
         % plotting
-        data = max(0.01,data);
+        data = max(1e-5,data);
         data = log10(data);
       case 'say'
         unix(['say ' var]);
@@ -413,6 +424,10 @@ if nargin > 5
         u = bustr;
         v = vvstr;
         depstr = [depstr ' Bottom stress vectors '];
+      elseif strcmp(var(end-3:end),'_sur')
+        u = nc_varget(file,'u_sur',START,COUNT);
+        v = nc_varget(file,'v_sur',START,COUNT);
+        depstr = [depstr ' Surface velocity vectors '];
       else
         u = nc_varget(file,'ubar',START,COUNT);
         v = nc_varget(file,'vbar',START,COUNT);

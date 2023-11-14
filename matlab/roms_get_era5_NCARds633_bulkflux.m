@@ -1,5 +1,5 @@
 function E = roms_get_era5_NCARds633_bulkflux(yyyy,mm,bbox,varargin)
-% E = roms_get_era5_NCARds633_bulkflux(yyyy,mm,bbox,[userpass],[fluxopt])
+% E = roms_get_era5_NCARds633_bulkflux(yyyy,mm,bbox,[fluxopt],[userpass])
 %
 % Read ECMWF ERA5 meteorological reanalysis from the NCAR Research Data 
 % Archive (RDA) dataset ds633.0 https://rda.ucar.edu/datasets/ds633.0
@@ -35,17 +35,9 @@ function E = roms_get_era5_NCARds633_bulkflux(yyyy,mm,bbox,varargin)
 % e5.oper.fc.sfc.meanflux Surface mean rate or fluxes 
 % https://rda.ucar.edu/datasets/ds633.0/docs/ds633.0.e5.oper.fc.sfc.meanflux.grib1.table.web.txt 
 % 
-% ERA5 data are freely available but you must be a registered user at
-% rda.ucar.edu to obtain access. See the "Register Now" link at the top 
-% left of https://rda.ucar.edu to obtain a login). 
-%
-% Login credentials must be passed to this function as the input USERPASS.
-% If they not given as an input, the function attempts to parse the 
-% information from your .netrc file. 
-%
 % This NCAR ds633 version of ERA5 is global 0.25 by 0.25 deg lon/lat at 
 % hourly intervals. It is a rolling archive that is updated monthly and 
-% has data available from 1979 up until now minus approximetely 4 months.  
+% has data available from 1979 up until now minus approximately 4 months.  
 %
 % Inputs:
 %
@@ -64,8 +56,31 @@ function E = roms_get_era5_NCARds633_bulkflux(yyyy,mm,bbox,varargin)
 %      them. If I ever have a project in the east Atlantic I might code 
 %      this merger automatically, but until then you are on your own.
 %
+% *************************************************************************
+% SOMETIME IN EARLY 2023 USERNAME:PASSWORD AUTHENTICATION WAS REMOVED. 
+% HOWEVER, NCAR HAVE ANNOUNCED THEY ARE TRANSITIONING TO USING ORCID FOR 
+% RDA AUTHENTICATION WHICH MAY IMPACT HOW THIS FUNCTION WORKS.
+% https://rda.ucar.edu/news/rda-transitioning-to-orcid-login/
+% *************************************************************************
+%
+% ERA5 data are freely available but you must be a registered user at
+% rda.ucar.edu to obtain access. See the "Register Now" link at the top 
+% left of https://rda.ucar.edu to obtain a login). 
+%
+% Login credentials must be passed to this function as the input USERPASS.
+% If they not given as an input, the function attempts to parse the 
+% information from your .netrc file. 
+%
 % Optional inputs:
 %
+%   fluxopt (string) - controls variables read from ERA5 for depending
+%     on the intended use with ROMS forcing files
+%       'bulkfluxes' (default) data for ROMS BULK_FLUXES option
+%       'onlyfluxes' stresses, heat flux, freshwater flux, net shortwave
+%       'allfluxes'  everything to support ROMS running with either bulk
+%                    fluxes or stresses/fluxes.
+%
+%   THE FOLLOWING IS NO LONGER REQUIRED ... FOR NOW ...
 %   userpass (string) - RDA authentication in the format:
 %     'username:password' (notice the colon between username and password)
 %     This string augments the OPeNDAP data URL thus:
@@ -82,13 +97,6 @@ function E = roms_get_era5_NCARds633_bulkflux(yyyy,mm,bbox,varargin)
 %     the colon - that will throw an error. 
 %     If userpass is not given, the function endeavors to parse them from
 %     your .netrc file
-%
-%   fluxopt (string) - controls variables read from ERA5 for depending
-%     on the intended use with ROMS forcing files
-%       'bulkfluxes' (default) data for ROMS BULK_FLUXES option
-%       'onlyfluxes' stresses, heat flux, freshwater flux, net shortwave
-%       'allfluxes'  everything to support ROMS running with either bulk
-%                    fluxes or stresses/fluxes.
 %
 % Outputs:
 %
@@ -136,19 +144,26 @@ for k=1:length(varargin)
 end
 
 % ERA5 analysis is username/password restricted
-if isempty(userpass)
-  try
-  userpass = userpass_from_netrc;
-  disp('Using username:password for rda.ucar.edu from $HOME/.netrc')
-  catch 
-    disp(['Unsuccessful parsing username and password credentials' ...
-      'for rda.ucar.edu from .netrc']); 
-    error('Try giving userpass string as input to this function')
-  end
-end
+% if isempty(userpass)
+%   try
+%   userpass = userpass_from_netrc;
+%   disp('Using username:password for rda.ucar.edu from $HOME/.netrc')
+%   catch 
+%     disp(['Unsuccessful parsing username and password credentials' ...
+%       'for rda.ucar.edu from .netrc']); 
+%     error('Try giving userpass string as input to this function')
+%   end
+% end
 
-urlbase = 'rda.ucar.edu/thredds/dodsC/files/g/ds633.0';
-server = strcat('https://',userpass,'@',urlbase,'/');
+% some time in early 2023 the THREDDS server hostname changed
+%rlbase = 'rda.ucar.edu/thredds/dodsC/files/g/ds633.0';
+urlbase = 'thredds.rda.ucar.edu/thredds/dodsC/files/g/ds633.0';
+server = strcat('https://',urlbase,'/');
+% if strcmp(userpass,':')
+%   server = strcat('https://',urlbase,'/');
+% else
+%   server = strcat('https://',userpass,'@',urlbase,'/');
+% end
 
 % ERA5 data in this archive use time since 01-01-1900
 epoch = datenum(1900,1,1);
@@ -436,25 +451,28 @@ for vname = ecmwf_vars
           
           case 1
             
+            disp('  Reading file 1 of 3 ...  ')
             I = ncinfo(url);
             dim = findstrinstruct(I.Dimensions,...
               'Name','forecast_initial_time');
             Last = I.Dimensions(dim).Length;
             
             % Get last 7 hours 
+            disp('   getting time coordinate ...')
+            fprintf('\b')
             itime = double(ncread(url,'forecast_initial_time',Last,1))/24 ...
               + epoch;
             ni = length(itime);
             fhour = double(ncread(url,'forecast_hour',6,7))/24;
             nf = length(fhour);
             time = repmat(itime',[nf 1])+repmat(fhour,[1 ni]);
-            disp('  Reading file 1 of 3 ...  ')
             tic
+            disp(' getting data ... ')
             data = ncread(url,E.(v).name,[Is Js 6 Last],[Ilen Jlen 7 1]);
             data = flip(data,2);
             fprintf('\b')
             toc
-            
+
             TIME = time(:);
             DATA = data(:,:,:);
             
@@ -464,18 +482,20 @@ for vname = ecmwf_vars
             % I have tested getting this in smaller chunks, but the fastest
             % method is a single query loading all initial times and 
             % forecast hours at once.
+            disp('  Reading file 2 of 3 ...  ')
+            disp('   getting time coordinate ...')
+            fprintf('\b')
             itime = double(ncread(url,'forecast_initial_time'))/24 + epoch;
             ni = length(itime);
             fhour = double(ncread(url,'forecast_hour'))/24;
             nf = length(fhour);
             time = repmat(itime',[nf 1])+repmat(fhour,[1 ni]);
-            disp('   Reading file 2 of 3 ...  ')
             tic
+            disp(' getting data ... ')
             data = ncread(url,E.(v).name,[Is Js 1 1],[Ilen Jlen Inf Inf]);
             data = flip(data,2);
             fprintf('\b')
             toc
-            
             TIME = cat(1,TIME,time(:));
             DATA = cat(3,DATA,data(:,:,:));
             
@@ -483,13 +503,16 @@ for vname = ecmwf_vars
             
             % Get the full 16 days
             % Then trim the extra 6 hours of the next month
+            disp('  Reading file 3 of 3 ...  ')
+            disp('   getting time coordinate ...')
+            fprintf('\b')
             itime = double(ncread(url,'forecast_initial_time'))/24 + epoch;
             ni = length(itime);
             fhour = double(ncread(url,'forecast_hour'))/24;
             nf = length(fhour);
             time = repmat(itime',[nf 1])+repmat(fhour,[1 ni]);
-            disp('    Reading file 3 of 3 ...  ')
             tic
+            disp(' getting data ... ')
             data = ncread(url,E.(v).name,[Is Js 1 1],[Ilen Jlen Inf Inf]);
             data = flip(data,2);
             fprintf('\b')
