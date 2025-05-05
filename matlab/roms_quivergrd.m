@@ -60,15 +60,16 @@ if max(abs(angle(:)))>2*pi
     warning('there are angles greater than 2*pi')
 end
 
-% average vector components to rho points
-u = av2(u')';
-v = av2(v);
-
-% pad to correct dimension with NaNs at edges
-u = u(:,[1 1:end end]);
-u(:,[1 end]) = NaN;
-v = v([1 1:end end],:);
-v([1 end],:) = NaN;
+if strcmp(roms_cgridpos(u,grd),'u')
+  % average vector components to rho points
+  u = av2(u')';
+  v = av2(v);
+  % and pad to correct dimension with NaNs at edges
+  u = u(:,[1 1:end end]);
+  u(:,[1 end]) = NaN;
+  v = v([1 1:end end],:);
+  v([1 end],:) = NaN;
+end
 
 % decimate the vectors
 if nargin < 4

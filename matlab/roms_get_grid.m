@@ -1,7 +1,8 @@
-function grd = roms_get_grid(grd_file,scoord,tindex,~)
-% grd = roms_get_grid(grd_file,outfile,zeta_input);
-% grd = roms_get_grid(grd_file,scoord_info);
+function grd = roms_get_grid(grd_file,scoord,tindex,no_zuv)
 % grd = roms_get_grid(grd_file)
+% grd = roms_get_grid(grd_file,scoord_info);
+% grd = roms_get_grid(grd_file,outfile,zeta_input);
+% grd = roms_get_grid(grd_file,outfile,zeta_input,dont_calc_zuv);
 %
 % Gets the lon,lat,mask,depth [and z coordinates] from roms netcdf
 % grd_file or output file
@@ -18,6 +19,8 @@ function grd = roms_get_grid(grd_file,scoord,tindex,~)
 %               Vtransform=1 and Vstretching=1 is assumed (compatibility)
 %            or 6-element vector [theta_s theta_b Tcline N ...
 %               Vtransform Vstretching] (recommended)
+%            Update 4/2024 to read s-coord parameters from global
+%               attributes to support CROCO files
 %
 %     zeta_in:  How to obtain zeta information to use when including free
 %                surface height in calculating z-coordinates
@@ -28,8 +31,8 @@ function grd = roms_get_grid(grd_file,scoord,tindex,~)
 %                and getpref('ROMS_WILKIN','USE_WETDRY_MASK') == true.
 %            2-d array of zeta values
 %
-%     calc_zuv: If present, this argument (any value) activates computing
-%               the depths z_u and z_v on the u and v points of the
+%     dont_calc_zuv: If present, this argument (any value) suppresses
+%               computing depths z_u and z_v on the u and v points of the
 %               ROMS C-grid
 %
 % Output is a structure containing all the grid information
@@ -89,7 +92,15 @@ else
       end
     end
   end
- 
+
+  % for grid files (croco) that have mask_rho but not mask_u, _v, _psi
+  if isfield(grd,'mask_rho') && ~isfield(grd,'mask_u')
+    [umask,vmask,pmask] = uvp_masks(grd.mask_rho');
+    grd.mask_u = umask';
+    grd.mask_v = vmask';
+    grd.mask_psi = pmask';
+  end
+
   I = ncinfo(grd_file);
   varlist = {'x_rho','y_rho','x_u','y_u','x_v','y_v','x_psi','y_psi'};
   if ~isempty(findstrinstruct(I.Variables,'Name','x_rho'))
@@ -111,7 +122,7 @@ else
     vname = char(v);
     try
       tmp = nc_varget(grd_file,vname);
-      grd.(vname) = tmp; %replaces grd = setfield(grd,vname,tmp);
+      grd.(vname) = tmp; 
     catch
       %warning('RomsGetGrid:NoLonLat',...
       %  [vname ' not found. Substituting x/y coords instead'])
@@ -129,6 +140,26 @@ else
       grd.merc = false;
     end
   end
+
+  % for grid files (croco) that have lon_rho,lat_rho but not lon_u, lon_v, 
+  % lon_psi, lat_u, lat_v, lat_psi
+  if isfield(grd,'lon_rho') && ~isfield(grd,'lon_u')
+    [Lp,Mp] = size(grd.lon_rho');
+    M = Mp-1;
+    L = Lp-1;
+    [xi_rho,eta_rho] = meshgrid(0:L,0:M);
+    [xi_u,eta_u] = meshgrid(0.5:1:L-0.5,0:M);
+    [xi_v,eta_v] = meshgrid(0:L,0.5:1:M-0.5);
+    [xi_psi,eta_psi] = meshgrid(0.5:1:L-0.5,0.5:1:M-0.5);
+    grd.lon_u = interp2(xi_rho,eta_rho,grd.lon_rho,xi_u,eta_u);
+    grd.lat_u = interp2(xi_rho,eta_rho,grd.lat_rho,xi_u,eta_u);
+    grd.lon_v = interp2(xi_rho,eta_rho,grd.lon_rho,xi_v,eta_v);
+    grd.lat_v = interp2(xi_rho,eta_rho,grd.lat_rho,xi_v,eta_v);
+    grd.lon_psi = interp2(xi_rho,eta_rho,grd.lon_rho,xi_psi,eta_psi);
+    grd.lat_psi = interp2(xi_rho,eta_rho,grd.lat_rho,xi_psi,eta_psi);
+  end
+  % to enable plotting of the perimeter, or data searcehs covering the
+  % doman bounding box
   try
     grd.bounding_box = [min(grd.lon_psi(:)) max(grd.lon_psi(:)) ...
       min(grd.lat_psi(:)) max(grd.lat_psi(:))];
@@ -166,7 +197,7 @@ else
     land = grd.mask_rho_nan==0;
     grd.mask_rho_nan(land) = NaN;
   else
-    % if there is no mask information in the file so create unit masks
+    % if there is no mask information in the file create unit masks
     % in case code tries to use them
     grd.mask_rho = ones(size(grd.h));
     grd.mask_rho_nan = grd.mask_rho;
@@ -185,7 +216,7 @@ else
   end
   
   if nargin > 2
-    if length(tindex)==1 && tindex~=0
+    if isscalar(tindex) && tindex~=0
       % possibly get the appropriate land/sea or wet/dry mask for this time
       % haswetdry = nc_isvar(grd_file,'wetdry_mask_rho');
       haswetdry = ~isempty(findstrinstruct(I.Variables,'Name','wetdry_mask_rho'));
@@ -219,6 +250,8 @@ else
   
 end % loading 2D fields independent of s-coordinate
 
+% Load the 3-D z coordinates
+
 if nargin > 1
   
   h = grd.h;
@@ -231,54 +264,14 @@ if nargin > 1
   [theta_s,theta_b,Tcline,N,Vtransform,Vstretching] = ...
     roms_get_scoord(scoord);
   
-  % This logic shifted to an embedded function at the end of this file
-  %
-  %   if ~ischar(scoord)
-  %
-  %     theta_s = scoord(1);
-  %     theta_b = scoord(2);
-  %     Tcline  = scoord(3);
-  %     N       = scoord(4);
-  %     if (length(scoord) < 5)
-  %       Vtransform = 1;
-  %       Vstretching = 1;
-  %     else
-  %       Vtransform = scoord(5);
-  %       Vstretching = scoord(6);
-  %     end
-  %     hc = Tcline;
-  %
-  %   else
-  %
-  %     % input 'scoord' is a his/avg/rst file name or opendap url
-  %     % attempt to get s-coord params from this file/url
-  %
-  %     theta_s = ncread(scoord,'theta_s');
-  %     theta_b = ncread(scoord,'theta_b');
-  %     hc      = ncread(scoord,'hc');
-  %     try
-  %       Tcline  = ncread(scoord,'Tcline');
-  %     catch
-  %       Tcline = hc;
-  %     end
-  %     N = length(ncread(scoord,'Cs_r'));
-  %     if nc_isvar(scoord,'Vtransform')
-  %       Vtransform = ncread(scoord,'Vtransform');
-  %     else
-  %       Vtransform = 1;
-  %     end
-  %     if nc_isvar(scoord,'Vstretching')
-  %       Vstretching = ncread(scoord,'Vstretching');
-  %     else
-  %       Vstretching = 1;
-  %     end
-  %
-  %   end
-  
   hc = Tcline;
   if Vtransform == 1
     hc = min(Tcline,min(h(:)));
   end
+  
+  theta_s = double(theta_s);
+  theta_b = double(theta_b);
+  hc = double(hc);
 
   [s_rho,Cs_r] = stretching(Vstretching,theta_s,theta_b,hc,N,0,0);
   [s_w  ,Cs_w] = stretching(Vstretching,theta_s,theta_b,hc,N,1,0);
@@ -294,7 +287,7 @@ if nargin > 1
       % do nothing
       
     else % if tindex==0 zeta defaults to zero
-      if length(tindex)==1
+      if isscalar(tindex)
         % tindex is a single index to zeta in a roms output file
         if ischar(scoord)
           zeta = nc_varget(scoord,'zeta',[tindex-1 0 0],[1 -1 -1]);
@@ -345,37 +338,39 @@ if nargin > 1
   try
     grd.dA = 1./(grd.pm.*grd.pn);
     dA(1,:,:) = grd.dA;
-    dV = bsxfun(@times,dA,grd.dz);
+    grd.dV = bsxfun(@times,dA,grd.dz);
   catch
   end
   
-  % compute the z depths on the velocity points as well
-  % this used to be (before 2009/10/08) optional but there is little
-  % reason not to do this and it's annoying when you've forgotten to
-  
-  % u-points (cell centres in vertical)
-  ugrid = 3;
-  z_u = set_depth(Vtransform,Vstretching,theta_s,theta_b,hc,N, ...
-    ugrid,h',zeta',0);
-  grd.z_u = permute(z_u,[3 2 1]);
-  
-  % u-points (cell edges in vertical)
-  z_uw = 0.5.*(z_w(1:L,1:Mp,:)+z_w(2:Lp,1:Mp,:));
-  grd.z_uw = permute(z_uw,[3 2 1]);
-  
-  % v-points (cell centres in vertical)
-  vgrid = 4;
-  z_v = set_depth(Vtransform,Vstretching,theta_s,theta_b,hc,N, ...
-    vgrid,h',zeta',0);
-  grd.z_v = permute(z_v,[3 2 1]);
-  
-  % v-points (cell edges in vertical)
-  z_vw= 0.5.*(z_w(1:Lp,1:M,:)+z_w(1:Lp,2:Mp,:));
-  grd.z_vw = permute(z_vw,[3 2 1]);
-  
+  if nargin < 4
+    % compute the z depths on the velocity points as well
+    % this used to be (before 2009/10/08) optional but there is little
+    % reason not to do this and it's annoying when you've forgotten to
+
+    % u-points (cell centres in vertical)
+    ugrid = 3;
+    z_u = set_depth(Vtransform,Vstretching,theta_s,theta_b,hc,N, ...
+      ugrid,h',zeta',0);
+    grd.z_u = permute(z_u,[3 2 1]);
+
+    % u-points (cell edges in vertical)
+    z_uw = 0.5.*(z_w(1:L,1:Mp,:)+z_w(2:Lp,1:Mp,:));
+    grd.z_uw = permute(z_uw,[3 2 1]);
+
+    % v-points (cell centres in vertical)
+    vgrid = 4;
+    z_v = set_depth(Vtransform,Vstretching,theta_s,theta_b,hc,N, ...
+      vgrid,h',zeta',0);
+    grd.z_v = permute(z_v,[3 2 1]);
+
+    % v-points (cell edges in vertical)
+    z_vw= 0.5.*(z_w(1:Lp,1:M,:)+z_w(1:Lp,2:Mp,:));
+    grd.z_vw = permute(z_vw,[3 2 1]);
+
+  end
+
   clear z_u z_uw z_v z_vw
   
-  grd.dV = dV;
   grd.Vtransform = Vtransform;
   grd.Vstretching = Vstretching;
   grd.theta_s = theta_s;
@@ -402,27 +397,49 @@ if ischar(scoord) || isstring(scoord)
   
   % scoord is a his/avg/rst file name or opendap url
   
-  theta_s = ncread(scoord,'theta_s');
-  theta_b = ncread(scoord,'theta_b');
-  hc = ncread(scoord,'hc');
+  iscroco = false;
   try
-    Tcline  = ncread(scoord,'Tcline');
+    theta_s = ncread(scoord,'theta_s');
   catch
-    Tcline = hc;
+    % assume this is a croco file with s-coord params in global attributes
+    iscroco = true;
   end
-  I = ncinfo(scoord);
-  N = length(ncread(scoord,'Cs_r'));
-  % if nc_isvar(scoord,'Vtransform')
-  if ~isempty(findstrinstruct(I.Variables,'Name','Vtransform'))
-    Vtransform = ncread(scoord,'Vtransform');
+
+  if ~iscroco
+    theta_s = ncread(scoord,'theta_s');
+    theta_b = ncread(scoord,'theta_b');
+    hc = ncread(scoord,'hc');
+    try
+      Tcline  = ncread(scoord,'Tcline');
+    catch
+      Tcline = hc;
+    end
+    I = ncinfo(scoord);
+    N = length(ncread(scoord,'Cs_r'));
+    % if nc_isvar(scoord,'Vtransform')
+    if ~isempty(findstrinstruct(I.Variables,'Name','Vtransform'))
+      Vtransform = ncread(scoord,'Vtransform');
+    else
+      Vtransform = 1;
+    end
+    % if nc_isvar(scoord,'Vstretching')
+    if ~isempty(findstrinstruct(I.Variables,'Name','Vstretching'))
+      Vstretching = ncread(scoord,'Vstretching');
+    else
+      Vstretching = 1;
+    end
   else
-    Vtransform = 1;
-  end
-  % if nc_isvar(scoord,'Vstretching')
-  if ~isempty(findstrinstruct(I.Variables,'Name','Vstretching'))
-    Vstretching = ncread(scoord,'Vstretching');
-  else
-    Vstretching = 1;
+    I = ncinfo(scoord);
+    Vtransform = 2;
+    Vstretching = 4;
+    theta_s = ...
+      I.Attributes(findstrinstruct(I.Attributes,'Name','theta_s')).Value;
+    theta_b = ...
+      I.Attributes(findstrinstruct(I.Attributes,'Name','theta_b')).Value;
+    Tcline = ...
+      I.Attributes(findstrinstruct(I.Attributes,'Name','Tcline')).Value;
+    N = ...
+      I.Dimensions(findstrinstruct(I.Dimensions,'Name','s_rho')).Length;
   end
 
 elseif isstruct(scoord)

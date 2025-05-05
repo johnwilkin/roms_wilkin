@@ -91,10 +91,15 @@ if ~all((size(x)-size(c))==0)
   end
 end
 
-datenum_to_datetime = false;
+datenum_to_datetime_x = false;
 if isdatetime(x)
-  datenum_to_datetime = true;
-  x = datenum(x);
+  datenum_to_datetime_x = true;
+  x = convertTo(x,'datenum');
+end
+datenum_to_datetime_y = false;
+if isdatetime(y)
+  datenum_to_datetime_y = true;
+  y = convertTo(y,'datenum');
 end
 
 [m,n] = size(x);
@@ -104,19 +109,22 @@ x = [ x(1,:); 0.5*(x(1:m-1,:) + x(2:m,:)); x(m,:)];
 y = [ y(1,:); 0.5*(y(1:m-1,:) + y(2:m,:)); y(m,:)];
 c = [ c  NaN*ones(m,1)];
 c = [ c; NaN*ones(1,n+1)];
-hh = surface(x,y,zeros(size(c)),c);
-lims = [min(min(x)) max(max(x)) min(min(y)) max(max(y))];
 
-set(hh,'edgecolor','none','facecolor','flat')
-
-if datenum_to_datetime
+if datenum_to_datetime_x
   x = datetime(x,'ConvertFrom','datenum');
 end
+if datenum_to_datetime_y
+  y = datetime(y,'ConvertFrom','datenum');
+end
+
+hh = surface(x,y,zeros(size(c)),c);
+set(hh,'edgecolor','none','facecolor','flat')
 
 if ~hold_state
   set(cax,'View',[0 90]);
   set(cax,'Box','on');
-  axis(lims);
+  % lims = [min(min(x)) max(max(x)) min(min(y)) max(max(y))];
+  % axis(lims);
 end
 if nargout > 0
   h = hh;

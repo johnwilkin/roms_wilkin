@@ -4,41 +4,6 @@ function E = roms_get_era5_NCARds633_bulkflux(yyyy,mm,bbox,varargin)
 % Read ECMWF ERA5 meteorological reanalysis from the NCAR Research Data 
 % Archive (RDA) dataset ds633.0 https://rda.ucar.edu/datasets/ds633.0
 %
-% Use this function to extract data for a chosen month, then use 
-% roms_write_era5_NCARds633_frcfile to create and write the ROMS format 
-% surface forcing netcdf file. 
-%
-% This function reads everything ROMS needs to build a surface forcing 
-% file for:
-%
-%     Bulk fluxes option: marine boundary layer pressure, 2-m air 
-%     temperature, 2-m dew point (for conversion to relative humidity), 
-%     10-m winds, net shortwave radiation, and both net longwave and 
-%     downward longwave radiation from which ROMS selects depending on 
-%     whether the ROMS user has #define LONGWAVE_OUT or not.
-%
-%     Prescribed net fluxes: east and north stress (momentum flux), 
-%     net heat flux (latent + sensible + net longwave + net shortwave), 
-%     net shortwave radiation (if the user wants to #define SOLAR_SOURCE), 
-%     and freshwater flux (kg m^-2 s^-1) from ERA5 rain and evaporation.
-%
-%     Note: Be careful forcing ROMS with imposed stresses in coastal
-%     applications. ERA5 has a fractional land/sea mask, and points near
-%     the coast may have stresses that are more indicative of coonditions
-%     on the adjacent land that over water, i.e. much stronger. The bulk
-%     fluxes option doesn't have this problem because it uses a drag 
-%     coefficient suited to the ocean, not rough terrain. 
-%
-% Guidance on variables in ERA5 collections:
-% e5.oper.an.sfc Surface analysis 
-% https://rda.ucar.edu/datasets/ds633.0/docs/ds633.0.e5.oper.an.sfc.grib1.table.web.txt
-% e5.oper.fc.sfc.meanflux Surface mean rate or fluxes 
-% https://rda.ucar.edu/datasets/ds633.0/docs/ds633.0.e5.oper.fc.sfc.meanflux.grib1.table.web.txt 
-% 
-% This NCAR ds633 version of ERA5 is global 0.25 by 0.25 deg lon/lat at 
-% hourly intervals. It is a rolling archive that is updated monthly and 
-% has data available from 1979 up until now minus approximately 4 months.  
-%
 % Inputs:
 %
 %   yyyy (scalar) - the year number
@@ -48,83 +13,62 @@ function E = roms_get_era5_NCARds633_bulkflux(yyyy,mm,bbox,varargin)
 %   bbox - A 4-element vector in the format of Matlab axis defining the
 %      lon/lat bounding box region to subset with the OPeNDAP query
 %      e.g. bbox = [-110 -30 0 55] or [250 330 0 55] for West Atlantic.
-%      NOTE: The longitude coordinate in ERA5 breaks at the prime meridian. 
-%      This function detects whether the input longitudes in BBOX are 
-%      negative (west of prime meridian) or positive (east of prime 
-%      and adjusts accordingly, but the query cannot stradle the prime 
-%      meridian. For such a case the user has to make two files and merge 
-%      them. If I ever have a project in the east Atlantic I might code 
-%      this merger automatically, but until then you are on your own.
-%
-% *************************************************************************
-% SOMETIME IN EARLY 2023 USERNAME:PASSWORD AUTHENTICATION WAS REMOVED. 
-% HOWEVER, NCAR HAVE ANNOUNCED THEY ARE TRANSITIONING TO USING ORCID FOR 
-% RDA AUTHENTICATION WHICH MAY IMPACT HOW THIS FUNCTION WORKS.
-% https://rda.ucar.edu/news/rda-transitioning-to-orcid-login/
-% *************************************************************************
-%
-% ERA5 data are freely available but you must be a registered user at
-% rda.ucar.edu to obtain access. See the "Register Now" link at the top 
-% left of https://rda.ucar.edu to obtain a login). 
-%
-% Login credentials must be passed to this function as the input USERPASS.
-% If they not given as an input, the function attempts to parse the 
-% information from your .netrc file. 
+%      NOTE: ERA5 longitudes break at the prime meridian. This function 
+%      detects whether BBOX longitudes are negative (west) or positive 
+%      (east of prime meridian) and adjusts accordingly. The query cannot 
+%      stradle the prime meridian. In such a case the user has to make two
+%      files and merge them. If I ever have a project in the east Atlantic 
+%      I might code this, but until then you are on your own.
 %
 % Optional inputs:
 %
-%   fluxopt (string) - controls variables read from ERA5 for depending
-%     on the intended use with ROMS forcing files
+%   fluxopt (string) - controls variables read
 %       'bulkfluxes' (default) data for ROMS BULK_FLUXES option
 %       'onlyfluxes' stresses, heat flux, freshwater flux, net shortwave
-%       'allfluxes'  everything to support ROMS running with either bulk
-%                    fluxes or stresses/fluxes.
-%
-%   THE FOLLOWING IS NO LONGER REQUIRED ... FOR NOW ...
-%   userpass (string) - RDA authentication in the format:
-%     'username:password' (notice the colon between username and password)
-%     This string augments the OPeNDAP data URL thus:
-%     url = 'https://username:password@rda.ucar.edu/thredds/dodsC/...
-%                    ^^^^^^^^^^^^^^^^^
-%     If your username or password includes text that would be interpretted
-%     by the http protocol it must be URL encoded. In particular, since it 
-%     is common practise to use an email address as RDA username, the @ 
-%     must be encoded as %40, e.g. my username and password would be 
-%     userpass = 'jwilkin%40rutgers.edu:mypassword' (not my real password!)
-%     At site https://www.w3schools.com/tags/ref_urlencode.ASP you can
-%     enter your username or password string to find out how to URL 
-%     encode them to build username:password string. But DON'T URL encode
-%     the colon - that will throw an error. 
-%     If userpass is not given, the function endeavors to parse them from
-%     your .netrc file
+%       'allfluxes'  everything for either bulk fluxes or stresses/fluxes
 %
 % Outputs:
 %
-%   E (structure) - contains all the information required by script
-%   roms_write_era5_NCARds633_frcfile.m to generate a ROMS format forcing
-%   netcdf file.
+%   The output in E (a structure) has everyhting needed by the script 
+%   roms_write_era5_NCARds633_frcfile.m to create a ROMS forcing file.
 %
-%   Note: Data for entire year/month requested here are returned at hourly
-%   intervals. MIDNIGHT ON THE LAST DAY OF THE MONTH IS NOT INCLUDED. That
-%   will be in the next file in the year/month sequence passed to ROMS
-%   input.
+%   The variables in E depend on FLUXOPT: 
 %
-% NOTE on Matlab versions:
-%   This code runs successfully with Matlab Release 2020b (9.9.0.1467703).
-%   Some Matlab versions throw an error in ncread when reading flux 
-%   variables (longwave radiation etc.). Circumstantial evidence links this
-%   to ncread built with NetCDF 4.6.1. You can check the version of NetCDF 
-%   that your Matlab is using with: >> libvers = netcdf.inqLibVers
-%    
-% John Wilkin - December 2020
+%     Bulk fluxes option: marine boundary layer pressure, 2-m air 
+%     temperature, 2-m dew point (for conversion to relative humidity), 
+%     10-m winds, net shortwave radiation, and both net longwave and 
+%     downward longwave radiation (for #define LONGWAVE_OUT).
+%
+%     Prescribed net fluxes: east and north stress, net heat flux (latent+ 
+%     sensible + net longwave + net shortwave), net shortwave radiation 
+%     and freshwater flux (kg m^-2 s^-1) (ERA5 rain and evaporation).
+%
+%     Take care with imposed stresses in coastal applications. ERA5 has a 
+%     fractional land/sea mask, and near the coast stresses may be affected
+%     by land where the drag coefficient is larger. The bulk fluxes option 
+%     doesn't have this problem because it uses an ocean drag coefficient. 
+%
+% Guidance on ERA5 collections:
+% e5.oper.an.sfc Surface analysis 
+% https://rda.ucar.edu/datasets/ds633.0/docs/ds633.0.e5.oper.an.sfc.grib1.table.web.txt
+% e5.oper.fc.sfc.meanflux Surface mean rate or fluxes 
+% https://rda.ucar.edu/datasets/ds633.0/docs/ds633.0.e5.oper.fc.sfc.meanflux.grib1.table.web.txt 
+% 
+% These data are global 0.25 by 0.25 deg lon/lat, hourly. The rolling 
+% archive is updated monthly and has data available from 1979.  
 %
 % Copyright (c) 2021 - John L. Wilkin - jwilkin@rutgers.edu
-% $Id: roms_get_era5_NCARds633_bulkflux.m 589 2020-12-28 21:50:00Z wilkin $
-%
 % Obtain an up-to-date version of this code from 
 % https://github.com/johnwilkin/roms_wilkin
 %
 % See also roms_write_era5_NCARds633_frcfile
+
+if nargin ==0
+  % Open the RDA catalog to view what files are available
+  web("https://thredds.rda.ucar.edu/thredds/catalog/files/g/ds633.0/e5.oper.an.sfc/catalog.html")
+  help roms_get_era5_NCARds633_bulkflux
+  return
+end
 
 userpass = [];
 fluxopt = 'bulkfluxes';
@@ -412,6 +356,7 @@ for vname = ecmwf_vars
   
   % assume user is requesting longitudes west of the prime meridian given
   % as negative values
+  
   if all(bbox(1:2)<0)
     lon = ncread(url,'longitude')-360;
     minus360 = true;

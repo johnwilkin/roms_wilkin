@@ -30,7 +30,7 @@ if isempty(findstrinstruct(I.Variables,'Name',var))
 end
 
   if ischar(time)
-    fdnums = roms_get_date(file,-1);
+    fdnums = roms_get_time(file,-1);
     if strcmp(time,'latest')
       time = length(fdnums);
     else
@@ -74,7 +74,7 @@ if isprognostic
       error(' ')
   end
   data = nc_varget(file,var,[time-1 0 0],[1 -1 -1]);
-  t = roms_get_date(file,time); % gets output in matlab datenum convention
+  t = roms_get_time(file,time); % gets output in matlab datenum convention
 else
   data = nc_varget(file,var);
   t = [];

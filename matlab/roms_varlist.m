@@ -83,7 +83,7 @@ for k=1:nargin
             'carbon_bottom','carbon_buried','C_excess_uptake'};
         case 'bulkflux'
           varlist = {'Uwind','Vwind','Pair','Tair','Qair','swrad',...
-            'lwrad','lwrad_down','rain'};
+            'lwrad_down','lwrad','rain'};
         case 'fluxes'
           varlist = {'sustr','svstr','shflux','swrad','swflux'};
         otherwise

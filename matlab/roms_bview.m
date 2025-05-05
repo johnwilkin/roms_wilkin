@@ -10,6 +10,8 @@ function [Data,han] = roms_bview(file,varname,time,bndy,grd,xcoord)
 %       grd_file name
 %       [] (will attempt to get grid from roms file)
 % xcoord = 'lon','lat', or 'dist' (default) to specify plot abscissa
+%       Any other value suppresses plotting but still returns data as in
+%       roms_bviews function which plots multiple boundaries at once
 %
 % John Wilkin jwilkin@rutgers.edu
 %
@@ -47,7 +49,11 @@ else
 end
 
 % time coordinate variable
-tvarname = roms_get_time_varname(file,varname);
+try
+  tvarname = roms_get_time_varname(file,varname);
+catch
+  warning("Could not get time coordinate name from file")
+end
 
 % time information
 if isinf(time)
@@ -115,11 +121,16 @@ data = nc_varget(file,varname,[time-1 0 0],[1 -1 -1]);
 data = squeeze(data);
 
 % get the time/date for plot label
-t = roms_get_time(file,time);
-if isdatetime(t)
-  tdate = ['on day ' datestr(t,0)];
-else
-  tdate = ['on day ' num2str(t,'%8.2f')];
+try
+  t = roms_get_time(file,time);
+  if isdatetime(t)
+    tdate = ['on day ' datestr(t,0)];
+  else
+    tdate = ['on day ' num2str(t,'%8.2f')];
+  end
+catch
+  warning("Could not read time coordinate from file")
+  tdate = ' ';
 end
 
 % pcolor plot of the variable

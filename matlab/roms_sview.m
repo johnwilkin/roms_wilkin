@@ -55,6 +55,8 @@ function [thedata,thegrid,han] = roms_sview(file,var,time,k,grd,vec_d,uscale,var
 %              from vector (ubar,vbar)
 %            'umag' or 'vmag' plots velocity magnitude computed
 %              from vector (u,v)
+%            'u_surmag' or 'v_surmag' plots velocity magnitude computed
+%              from vector (u_sur,v_sur) in a QUICKSAVE file 
 %            'stress' or 'bstress' plot the magnitude of the surface or
 %               bottom stress, respectively
 %            'rvor' plot relative velocity
@@ -155,6 +157,8 @@ end
 
 % figure out whether a 2-D or 3-D variable by testing the dimensions of the
 % variable
+uvar = 'u';
+vvar = 'v';
 switch var
   case {'ubarmag','vbarmag','rvorbar'}
     vartest = 'ubar';
@@ -174,6 +178,8 @@ switch var
     vartest = 'temp';
   case {'u_surmag','v_surmag'}
     vartest = 'u_sur';
+    % uvar = 'u_var';
+    % vvar = 'v_var';
   otherwise
     vartest = var;
 end
@@ -424,10 +430,11 @@ if nargin > 5
         u = bustr;
         v = vvstr;
         depstr = [depstr ' Bottom stress vectors '];
-      elseif strcmp(var(end-3:end),'_sur')
+%     elseif strcmp(var(end-3:end),'_sur')
+      elseif contains(var,'_sur')
         u = nc_varget(file,'u_sur',START,COUNT);
         v = nc_varget(file,'v_sur',START,COUNT);
-        depstr = [depstr ' Surface velocity vectors '];
+        depstr = ' Surface velocity vectors ';
       else
         u = nc_varget(file,'ubar',START,COUNT);
         v = nc_varget(file,'vbar',START,COUNT);
@@ -441,6 +448,17 @@ if nargin > 5
     v = squeeze(v);
     u(isnan(u)==1) = 0;
     v(isnan(v)==1) = 0;
+
+    if usewetdry
+      mu = squeeze(nc_varget(file,'wetdry_mask_u',[time-1 0 0],[1 -1 -1]));
+      mv = squeeze(nc_varget(file,'wetdry_mask_v',[time-1 0 0],[1 -1 -1]));
+      u(mu==0) = NaN;
+      v(mv==0) = NaN;
+    else
+      u(grd.mask_u==0) = 0;
+      v(grd.mask_v==0) = 0;
+    end
+
     if uscale > 0
       % quiver plot
       [hanquiver,dataq] = roms_quivergrd(u,v,grd,vec_d,uscale,varargin{:});
