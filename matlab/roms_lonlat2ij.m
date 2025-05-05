@@ -17,9 +17,8 @@ function [Fi,Fj] = roms_lonlat2ij(grd)
 % $Id: roms_lonlat2ij.m 548 2020-01-18 23:23:36Z robertson $
 
 if isstruct(grd)
-  g = grd('doppio');
-  lon = g.lon_rho';
-  lat = g.lat_rho';
+  lon = grd.lon_rho';
+  lat = grd.lat_rho';
 else
   lon = ncread(grd,'lon_rho');
   lat = ncread(grd,'lat_rho');

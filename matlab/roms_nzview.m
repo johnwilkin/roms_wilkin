@@ -5,7 +5,7 @@ function [thedata,thegrid,thehan] = roms_nzview(file,var,ntime,z,grd,nvec_d,usca
 % variable and z-depth. Useful for superimposing nested grid solutions
 %
 % Same input syntax as roms_zview except:
-% FILE is a cell array of files names
+% FILE is a cell array of files names in order coarse to fine
 % GRD is a cell array of grid structures, unless isempty(grd) in which
 %    case grid structures will be retrieved from the respective files
 % If TIME is a vector, each index is used in the respective grids. Input

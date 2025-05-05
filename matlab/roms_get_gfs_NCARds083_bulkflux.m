@@ -22,6 +22,9 @@ function G = roms_get_gfs_NCARds083_bulkflux(romsvname,outcoords)
 
 % GFS is unrestricted (does not require user/pass authentication like ERA5)
 dataurl = 'https://rda.ucar.edu/thredds/dodsC/aggregations/g/ds083.3/1/Best';
+%https://thredds.rda.ucar.edu/thredds/dodsC/aggregations/g/d083003/1/ds083.3-2015/Best
+%https://thredds.rda.ucar.edu/thredds/dodsC/aggregations/g/d083003/1/ds083.3-2023/ds083.3-202303
+dataurl = 'https://thredds.rda.ucar.edu/thredds/dodsC/aggregations/g/d083003/1/TP';
 
 %% determine which variables to process for ROMS
 

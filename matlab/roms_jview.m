@@ -36,7 +36,7 @@ function [Data,han] = roms_jview(file,var,time,jindex,grd,cplot,clev)
 % See also ROMS_ZVIEW, ROMS_SVIEW, ROMS_IVIEW
 
 if nargin == 0
-  help roms_iview
+  help roms_jview
   return
 end
 

@@ -49,6 +49,13 @@ if isinf(depth)
   depth = grd.N;
 end
 
+if isinf(time)
+  time = 'latest';
+end
+if ischar(time) || isdatetime(time)
+  time = roms_get_time_index(file,time);
+end
+
 % get plot state
 nextplotstatewas = get(gca,'nextplot');
 

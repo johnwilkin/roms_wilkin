@@ -18,8 +18,8 @@ else
   end
 end
 
-su = size(grd.lon_u);
-sv = size(grd.lon_v);
+% su = size(grd.lon_u);
+% sv = size(grd.lon_v);
 sr = size(grd.lon_rho);
 if isfield(grd,'lon_psi')
   sp = size(grd.lon_psi);
@@ -33,9 +33,9 @@ end
 s = s([end-1 end]);
 if all(~(s-sr))
   pos = 'rho';
-elseif all(~(s-su))
+elseif all(~(s-size(grd.lon_u)))
   pos = 'u';
-elseif all(~(s-sv))
+elseif all(~(s-size(grd.lon_v)))
   pos = 'v';
 elseif all(~(s-sp))
   pos = 'psi';

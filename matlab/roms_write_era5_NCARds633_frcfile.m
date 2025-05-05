@@ -127,13 +127,17 @@ S.Attributes(5).Value = max(lat);
 S.Attributes(6).Name = 'geospatial_lat_min';
 S.Attributes(6).Value = min(lat);
 S.Attributes(7).Name = 'geospatial_lat_resolution';
-S.Attributes(7).Value = diff(lat(1:2));
+if numel(lat)>1
+  S.Attributes(7).Value = diff(lat(1:2));
+end
 S.Attributes(8).Name = 'geospatial_lon_max';
 S.Attributes(8).Value = max(lon);
 S.Attributes(9).Name = 'geospatial_lon_min';
 S.Attributes(9).Value = min(lon);
 S.Attributes(10).Name = 'geospatial_lon_resolution';
-S.Attributes(10).Value = diff(lon(1:2));
+if numel(lon)>1
+  S.Attributes(10).Value = diff(lon(1:2));
+end
 S.Attributes(11).Name = 'time_coverage_start';
 S.Attributes(11).Value = datestr(E.time.data(1),31);
 S.Attributes(12).Name = 'time_coverage_end';

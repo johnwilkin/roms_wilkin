@@ -1,5 +1,5 @@
-function [han,hant,lon,lat] = roms_plot_river_source_locations(file,g,color)
-% [hansym,hanlab,lon,lat] = roms_plot_river_source_locations(file,grd,[color])
+function [han,hant,lon,lat] = roms_plot_river_source_locations(file,g,color,rlist)
+% [hansym,hanlab,lon,lat] = roms_plot_river_source_locations(file,grd,[color],[rlist])
 %
 % Add symbols to an existing plot to show the locations of ROMS river 
 % point sources.
@@ -15,16 +15,17 @@ function [han,hant,lon,lat] = roms_plot_river_source_locations(file,g,color)
 % Inputs:
 %
 % FILE is a ROMS river forcing file
-%      or a structure containing the essential position information
+%      or a STRUCTURE containing the essential position information
 %      generated using roms_get_river_source_locations.m
 % GRD is a ROMS grid structure computed using roms_get_grid.m
 % COLOR (optional) is the symbol color
+% RLIST (optional) vector of river numbers to plot (default is all)
 %
 % Outputs:
 %
 % HANSYM is graphics handle to the plotted symbols (size number of rivers)
 % HANLAB is graphics handle labels than number the rivers as in the file
-% LON, LAT are ROMS gird point coordinates of the river sources 
+% LON, LAT are ROMS grid point coordinates of the river sources 
 %
 % John Wilkin; Sept 28 2014
 %              Updated August 2016 to give more detail
@@ -57,17 +58,17 @@ else
   xpos = ncread(file,'river_Xposition');
   ypos = ncread(file,'river_Eposition');
   rdir = ncread(file,'river_direction');
-  rsgn = sign(mean(ncread(file,'river_transport'),2));
+  rsgn = sign(mean(ncread(file,'river_transport'),2,'omitnan'));
 end
 
 % check if this is a LwSrc formatted file
-I = ncinfo(file);
-if findstrinstruct(I.Variables,'Name','LwSrc')
-  LwSrc = ncread(file,'LwSrc');
-  if LwSrc
-    rdir = 2*ones(size(rdir));
-  end
-end
+% I = ncinfo(file);
+% if findstrinstruct(I.Variables,'Name','LwSrc')
+%   LwSrc = ncread(file,'LwSrc');
+%   if LwSrc
+%     rdir = 2*ones(size(rdir));
+%   end
+% end
 
 % get plot state
 nextplotstatewas = get(gca,'nextplot');
@@ -75,19 +76,40 @@ nextplotstatewas = get(gca,'nextplot');
 % hold whatever is already plotted
 set(gca,'nextplot','add')
 
-if nargin < 3
+% if nargin < 3
+%   color = 'r';
+% end
+
+if nargin == 3
+  if isnumeric(color)
+    rlist = color;
+    color = 'r';
+  else
+    rlist = 1:length(xpos);
+  end
+elseif nargin == 4
+  if isnumeric(color)
+    rlist = color;
+  end
+  if ischar(rlist)
+    color = rlist;
+  end
+else
   color = 'r';
+  rlist = 1:length(xpos);
 end
 
-h = nan(size(xpos));
-ht = h;
-lon = h;
-lat = h;
-for r = 1:length(xpos)
+% h = nan(size(xpos));
+% ht = h;
+% lon = h;
+% lat = h;
+kount = 0;
+for r = rlist% 1:length(xpos)
+  kount = kount+1;
   switch rdir(r)
     case 0
-      lon(r) = g.lon_u(ypos(r)+1,xpos(r));
-      lat(r) = g.lat_u(ypos(r)+1,xpos(r));
+      lon(kount) = g.lon_u(ypos(r)+1,xpos(r));
+      lat(kount) = g.lat_u(ypos(r)+1,xpos(r));
       switch rsgn(r)
         case 1
           sym = '>';
@@ -96,8 +118,8 @@ for r = 1:length(xpos)
         case 0
           sym = 's';
       end
-      h(r) = plot(lon(r),lat(r),[color sym]);
-      plot(lon(r),lat(r),[color 'x']);
+      h(kount) = plot(lon(kount),lat(kount),[color sym]);
+      % plot(lon(r),lat(r),[color '.']);
     case 1
       switch rsgn(r)
         case 1
@@ -107,15 +129,15 @@ for r = 1:length(xpos)
         case 0
           sym = 's';
       end
-      lon(r) = g.lon_v(ypos(r),xpos(r)+1);
-      lat(r) = g.lat_v(ypos(r),xpos(r)+1);
-      h(r) = plot(lon(r),lat(r),[color sym]);
-      plot(lon(r),lat(r),[color 'x']);
+      lon(kount) = g.lon_v(ypos(r),xpos(r)+1);
+      lat(kount) = g.lat_v(ypos(r),xpos(r)+1);
+      h(kount) = plot(lon(kount),lat(kount),[color sym]);
+      % plot(lon(r),lat(r),[color 'x']);
     case 2
       sym = 'o';
-      lon(r) = g.lon_rho(ypos(r)+1,xpos(r)+1);
-      lat(r) = g.lat_rho(ypos(r)+1,xpos(r)+1);
-      h(r) = plot(lon(r),lat(r),[color sym]);
+      lon(kount) = g.lon_rho(ypos(r)+1,xpos(r)+1);
+      lat(kount) = g.lat_rho(ypos(r)+1,xpos(r)+1);
+      h(kount) = plot(lon(kount),lat(kount),[color sym]);
       % plot(lon(r),lat(r),[color 'x']);
       
     otherwise
@@ -130,8 +152,10 @@ set(h,'LineWidth',1)
 % label with numbers
 plabel = true;
 if plabel
-  for r = 1:length(xpos)
-    ht(r) = text(lon(r),lat(r),['  ' int2str(r)],'fontsize',20);
+  kount = 0;
+  for r = rlist % 1:length(xpos)
+    kount = kount+1;
+    ht(kount) = text(lon(kount),lat(kount),['  ' int2str(r)],'fontsize',20);
   end
 end
 
