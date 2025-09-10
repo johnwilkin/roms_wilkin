@@ -1,6 +1,8 @@
 function E = roms_get_era5_NCARds633_bulkflux(yyyy,mm,bbox,varargin)
 % E = roms_get_era5_NCARds633_bulkflux(yyyy,mm,bbox,[fluxopt],[userpass])
-%
+% -----------------------------------------------------------------
+% Note 2025-09-10: Changes below to URLBASE to use new GDEX service
+% -----------------------------------------------------------------
 % Read ECMWF ERA5 meteorological reanalysis from the NCAR Research Data 
 % Archive (RDA) dataset ds633.0 https://rda.ucar.edu/datasets/ds633.0
 %
@@ -66,8 +68,8 @@ function E = roms_get_era5_NCARds633_bulkflux(yyyy,mm,bbox,varargin)
 % See also roms_write_era5_NCARds633_frcfile
 
 if nargin ==0
-  % Open the RDA catalog to view what files are available
-  web("https://thredds.rda.ucar.edu/thredds/catalog/files/g/ds633.0/e5.oper.an.sfc/catalog.html")
+  % Open the catalog to view what files are available
+  web("https://tds.gdex.ucar.edu/thredds/catalog/files/g/d633000/e5.oper.an.sfc/catalog.html")
   help roms_get_era5_NCARds633_bulkflux
   return
 end
@@ -89,30 +91,17 @@ for k=1:length(varargin)
   end
 end
 
-% ERA5 analysis is username/password restricted
-% if isempty(userpass)
-%   try
-%   userpass = userpass_from_netrc;
-%   disp('Using username:password for rda.ucar.edu from $HOME/.netrc')
-%   catch 
-%     disp(['Unsuccessful parsing username and password credentials' ...
-%       'for rda.ucar.edu from .netrc']); 
-%     error('Try giving userpass string as input to this function')
-%   end
-% end
-
-% From time to time NCAR change the THREDDS server URL. If this script
-% fails, that is a likely culprit
-%rlbase = 'rda.ucar.edu/thredds/dodsC/files/g/ds633.0';
-%rlbase = 'thredds.rda.ucar.edu/thredds/dodsC/files/g/ds633.0';
+% Prior to September 2025 the THREDDS server was hosted as NCAR Research
+% Data Archive (RDA). In testing on 2025-09-10 the URL below still works 
+% and seemed to be a bit more ribust that the new GDEX service, so fall
+% back to this older URL is GDEX is failing
 urlbase = 'thredds.rda.ucar.edu/thredds/dodsC/files/g/d633000';
-server = strcat('https://',urlbase,'/');
 
-% if strcmp(userpass,':')
-%   server = strcat('https://',urlbase,'/');
-% else
-%   server = strcat('https://',userpass,'@',urlbase,'/');
-% end
+% September 2025 service migrated from rda.ucar.edu to gdex.ucar.edu
+% In testing on 2025-09-10 this new URL works but was somewhat prone to
+% timeout. Often, simply rerunning the script it worked. 
+urlbase =    'tds.gdex.ucar.edu/thredds/dodsC/files/g/d633000';
+server = strcat('https://',urlbase,'/');
 
 % ERA5 data in this archive use time since 01-01-1900
 epoch = datenum(1900,1,1);
