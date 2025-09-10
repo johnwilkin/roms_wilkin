@@ -53,7 +53,8 @@ else
   % get the time  
   Vinfo = ncinfo(file,var);
   time_variable = Vinfo.Dimensions(end).Name;
-  t = ncread(file,time_variable,time,1);
+  % t = ncread(file,time_variable,time,1);
+  t = roms_get_time(file,time);
 end
 
 % check the grid 

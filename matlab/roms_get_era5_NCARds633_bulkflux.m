@@ -17,8 +17,10 @@ function E = roms_get_era5_NCARds633_bulkflux(yyyy,mm,bbox,varargin)
 %      detects whether BBOX longitudes are negative (west) or positive 
 %      (east of prime meridian) and adjusts accordingly. The query cannot 
 %      stradle the prime meridian. In such a case the user has to make two
-%      files and merge them. If I ever have a project in the east Atlantic 
-%      I might code this, but until then you are on your own.
+%      files and merge them. The bash script era5_merge_west_east.sh in
+%      this directory will do that merger. See the instructions in the
+%      script on how to do this. It requires the UNIX tools ncpdq and 
+%      ncrcat from NCO https://nco.sourceforge.net/ 
 %
 % Optional inputs:
 %
@@ -99,10 +101,13 @@ end
 %   end
 % end
 
-% some time in early 2023 the THREDDS server hostname changed
+% From time to time NCAR change the THREDDS server URL. If this script
+% fails, that is a likely culprit
 %rlbase = 'rda.ucar.edu/thredds/dodsC/files/g/ds633.0';
-urlbase = 'thredds.rda.ucar.edu/thredds/dodsC/files/g/ds633.0';
+%rlbase = 'thredds.rda.ucar.edu/thredds/dodsC/files/g/ds633.0';
+urlbase = 'thredds.rda.ucar.edu/thredds/dodsC/files/g/d633000';
 server = strcat('https://',urlbase,'/');
+
 % if strcmp(userpass,':')
 %   server = strcat('https://',urlbase,'/');
 % else
@@ -360,7 +365,7 @@ for vname = ecmwf_vars
   if all(bbox(1:2)<0)
     lon = ncread(url,'longitude')-360;
     minus360 = true;
-  elseif all(bbox(1:2)>0)
+  elseif all(bbox(1:2)>=0)
     lon = ncread(url,'longitude');
     minus360 = false;
   else
