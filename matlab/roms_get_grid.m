@@ -158,8 +158,8 @@ else
     grd.lon_psi = interp2(xi_rho,eta_rho,grd.lon_rho,xi_psi,eta_psi);
     grd.lat_psi = interp2(xi_rho,eta_rho,grd.lat_rho,xi_psi,eta_psi);
   end
-  % to enable plotting of the perimeter, or data searcehs covering the
-  % doman bounding box
+  % to enable plotting of the perimeter, or data searches covering the
+  % domain bounding box
   try
     grd.bounding_box = [min(grd.lon_psi(:)) max(grd.lon_psi(:)) ...
       min(grd.lat_psi(:)) max(grd.lat_psi(:))];

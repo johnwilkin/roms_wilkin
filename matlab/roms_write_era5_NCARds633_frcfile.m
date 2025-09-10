@@ -40,6 +40,12 @@
 % then it is possible here to use just 'bulkfluxes' or 'onlyfluxes' and not
 % write all the variables. 
 
+% Debugging - write lon and lat as 1-D coordinate vectors to facilitate
+% concatenating along lon dimension to join two downloads that straddle the
+% prime meridian
+
+LONLAT2D = false;
+
 % Output file name prefix. If not set, name is MY_APPLICATION
 if ~exist('ROMS_APP','var')
   ROMS_APP = 'MY_APPLICATION';
@@ -66,11 +72,12 @@ Tname = 'time'; % need to reset some parameters from roms_metadata
 % yyyy and mm are inherited from the call to roms_get_era5_ncar_ds633
 YYYY = upper(int2str(E.yyyy));
 MM = upper(sprintf('%02d',E.mm));
-ncname = "frc_"+ROMS_APP+"_ERA5_"+fluxopt+"_"+YYYY+MM+".nc";
+ncname = ROMS_APP+"_frc_ERA5_"+fluxopt+"_"+YYYY+MM+".nc";
 
 titlestr = "ERA-5 meteorology forcing (from NCAR ds633.0) for " +ROMS_APP;
 citation = E.citation;
 
+% END OF USER PARAMETER BLOCK ---------------------------------------------
 % -------------------------------------------------------------------------
 
 spherical = true;
@@ -178,12 +185,20 @@ S.Variables(ivar).Attributes(natts+1).Value = 'gregorian';
 % Check ROMS metadata structure.  Fill unassigned fields.
 
 S = check_metadata(S);
+if ~LONLAT2D
+  index = findstrinstruct(S.Variables,'Name','lon');
+  S.Variables(index).Dimensions(2) = [];
+  index = findstrinstruct(S.Variables,'Name','lat');
+  S.Variables(index).Dimensions(1) = [];
+end
 
 % Create forcing NetCDF files. Write lon/lat coordinates
 
 ncid = nc_create(Outfile, mode, S);
-lon = repmat(lon,[1 Jm]);
-lat = repmat(lat',[Im 1]);
+if LONLAT2D
+  lon = repmat(lon,[1 Jm]);
+  lat = repmat(lat',[Im 1]);
+end
 nc_write(Outfile,'spherical',int32(spherical));
 nc_write(Outfile,'lon',lon);
 nc_write(Outfile,'lat',lat);

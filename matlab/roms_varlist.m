@@ -8,8 +8,8 @@ function varlistout = roms_varlist(varargin)
 %   physics, physics2d, physics3d, mixing3d, 
 %   s-param, s-coord, grid, 
 %   fennel (incl oxygen), fennelN (N only), fennelC (C only)
-%   usecos, usecosC (new C variables only), dom (synonym)
-%   biodiags (all), fenneldiags (just fennel), usecosdiags (just usecos)
+%   ecb, (or usecos), (usecosC new C variables only),
+%   biodiags (all), fenneldiags (just fennel), ecbdiags (just usecos)
 %   bulkflux (all inputs to bulk fluxes)
 %   fluxes (stress, net heat flux and net shortwave)
 %
@@ -65,7 +65,7 @@ for k=1:nargin
             'semilabileDOC','refractoryDOC'};
         case {'co2sys'}
           varlist = {'OmegaCa','OmegaAr','pH'};
-        case 'usecosall'
+        case {'ecb','usecosall'}
           varlist = {'NO3','NH4','chlorophyll','phytoplankton',...
             'zooplankton',...
             'LdetritusN','SdetritusN','TIC','alkalinity','LdetritusC',...
@@ -74,7 +74,7 @@ for k=1:nargin
         case 'fenneldiags'
           varlist = {'denitrification','CO2_airsea','pCO2',...
             'O2_airsea','P_Production','NO3_uptake'};
-        case 'usecosdiags'
+        case {'ecbdiags','usecosdiags'}
           varlist = {'nitrogen_buried','carbon_bottom','carbon_buried',...
             'C_excess_uptake'};
         case 'biodiags'

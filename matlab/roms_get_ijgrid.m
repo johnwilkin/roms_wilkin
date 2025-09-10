@@ -37,4 +37,5 @@ g.lon_psi = I;
 g.angle_orig = g.angle;
 g.angle = zeros(size(g.angle));
 g.nolatlon = 1; 
+g.merc = false;
 
