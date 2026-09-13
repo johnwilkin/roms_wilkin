@@ -2,15 +2,16 @@ function [Radius,Speed] = roms_rossbyradius(T,S,g)
 % [Ro,Uo] = roms_rossbyradius(temp,salt,grd)
 % Compute 1st baroclinic Rossby radius (km) and wave speed (m/s) from ROMS
 % 3-D temperature and salt fields and the GRD structure from roms_get_grid
+% GRD provides lon_rho, lat_rho, z_r, z_w and mask_rho
 %
-% This is very slow because it has to step through each vertical profile.
+% This is slow because it steps through each vertical profile in turn.
 %
 % The approximate Chelton method is about twice as fast as the exact
 % eigenvalue approach. They give similar results. 
 %
-% In previous versions this code could be acdelerated using a parfor loop 
+% In previous versions this code could be accelerated using a parfor loop 
 % but presently parpool on Matlab 2023b and 2024a on Apple Silicon M1 is
-% throwing memory probems so I have diabled the code. 
+% throwing memory probems so I have disabled the code. 
 %
 % Copyright (c) 2021 - John L. Wilkin - jwilkin@rutgers.edu
 % $Id: roms_rossbyradius.m 587 2020-10-16 14:32:09Z wilkin $
@@ -34,19 +35,21 @@ wet = find(g.mask_rho==1);
 prog = 0;
 waitbar(prog);
 
-% Mehtod to use computing Rossby wave speed
+% Method to use to compute Rossby wave speed
+% opt = 'eigenvalue';
 opt = 'Chelton';
+disp(strcat(' using ',opt,' method'))
 
 % parfor k=1:numel(g.mask_rho)
-for k = wet' % only wet points
+for ij = wet' % only wet points
 
 % if g.mask_rho(k)~=0 % Must do this with parfor
   
   % S, ptemp and pressure
-  sp = S(:,k);
-  tp = T(:,k);
-  pr = P(:,k);  % rho points
-  pw = PW(:,k); % w points
+  sp = S(:,ij);
+  tp = T(:,ij);
+  pr = P(:,ij);  % rho points
+  pw = PW(:,ij); % w points
 
   % sw_bfrq assumes potential temperature input, which is what ROMS outputs
   bfrq = sw_bfrq(sp,tp,pr);
@@ -54,17 +57,17 @@ for k = wet' % only wet points
 
   switch lower(opt)
     case 'eigenvalue'
-      [speed,radius] = rossby_modes(bfrq,pw,g.lat_rho(k),1);
+      [speed,radius] = rossby_modes(bfrq,pw,g.lat_rho(ij),1);
     case 'chelton'
       % Chelton method:
       %      c_m = 1/(m*pi) integral_-h^0 (Nz) dz
       % Vertical integral is inner product of NSQ times DZ
       speed = 1/pi*transpose(sqrt(bfrq))*diff(-pr);
-      radius = speed/g.f(k);
+      radius = speed/g.f(ij);
   end
-  Speed(k) = real(speed);
-  Radius(k) = real(radius);
-  prog = k/wet(end);
+  Speed(ij) = real(speed);
+  Radius(ij) = real(radius);
+  prog = ij/wet(end);
   waitbar(prog)
 
 % end % test of mask_rho
@@ -74,6 +77,9 @@ end
 % convert to km
 Radius = Radius/1000;
 
+
+% Function rossby_modes (below) is only used for opt == 'eigenvalue'
+%
 function [speed,radius,modes] = rossby_modes(bfrq,p,lat,keepmodes)
 % [speed,radius,shape] = rossby_modes(bfrq,p,lat,[keepmodes],[plot])
 %
@@ -106,7 +112,7 @@ end
 
 H = max(abs(p));  % allow for coordinate P being pressure (db)
 f = sw_f(lat);
-n    = 100;       % number of grid points in z in discretization
+n = 100;          % number of grid points in z in discretization
 z = linspace(-abs(p(1)),-abs(p(end)),n-1);
 delz = diff(z(1:2));
 
@@ -115,7 +121,7 @@ delz = diff(z(1:2));
 nsq = interp1(-abs(p),bfrq,z);
 
 % simple 2nd-order finite differences
-coef   = -1/delz^2  ./ (nsq+eps);
+coef   = -1/delz^2./(nsq+eps);
 A      = diag(-2*ones(n-1,1),0)+diag(ones(n-2,1),1)+diag(ones(n-2,1),-1);
 B      = diag(coef) * A;
 [V,D]  = eig(B);

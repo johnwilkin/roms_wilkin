@@ -5,7 +5,11 @@ function mld = roms_mld(file,time,grd,opt)
 %
 % Depth where density is 0.125 kg/m3 greater than rho(z=-10 m) 
 %
-% John Wilkin jwilkin@rutgers.edu
+% Aristizábal Vargas, M.F., Kim, H.S., Le Hénaff, M., Miles, T., 
+% Glenn, S. and Goni, G., 2024. Evaluation of the ocean component 
+% on different coupled hurricane forecasting models using 
+% upper-ocean metrics relevant to air-sea heat fluxes during 
+% Hurricane Dorian (2019). Frontiers in Earth Science, 12, p.1342390.
 %
 % Copyright (c) 2021 - John L. Wilkin - jwilkin@rutgers.edu
 
