@@ -1,5 +1,4 @@
 function [h,xx,yy] = pcolorjw(x,y,c)
-% $Id: pcolorjw.m 382 2009-10-08 14:45:45Z wilkin $
 %PCOLORJW
 %       PCOLORJW(X,Y,C) is a modified version of PCOLOR that expands the 
 %       dimension the inputs X, Y and C so that the checkerboard will show
