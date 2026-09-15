@@ -7,6 +7,7 @@ function [DATA,url] = erddap_read(varargin)
 %      circumvents the inconvenience of needing to know the datasetID that 
 %      ERDDAP uses to name the output structure.
 %
+%
 % Optional arguments:
 %      a weboptions class object, e.g. 
 %        weboptions('Timeout',600) if the server is timing out too quickly 
