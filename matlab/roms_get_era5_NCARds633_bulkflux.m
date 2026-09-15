@@ -93,8 +93,8 @@ end
 
 % Prior to September 2025 the THREDDS server was hosted as NCAR Research
 % Data Archive (RDA). In testing on 2025-09-10 the URL below still works 
-% and seemed to be a bit more ribust that the new GDEX service, so fall
-% back to this older URL is GDEX is failing
+% and seemed to be a bit more robust than the new GDEX service, so fall
+% back to this older URL if GDEX is failing
 urlbase = 'thredds.rda.ucar.edu/thredds/dodsC/files/g/d633000';
 
 % September 2025 service migrated from rda.ucar.edu to gdex.ucar.edu
@@ -103,7 +103,7 @@ urlbase = 'thredds.rda.ucar.edu/thredds/dodsC/files/g/d633000';
 urlbase =    'tds.gdex.ucar.edu/thredds/dodsC/files/g/d633000';
 server = strcat('https://',urlbase,'/');
 
-% ERA5 data in this archive use time since 01-01-1900
+% ERA5 data in this archive uses time since 01-01-1900
 epoch = datenum(1900,1,1);
 MM = sprintf('%02d',mm);
 YYYY = sprintf('%d',yyyy);
@@ -502,8 +502,12 @@ for vname = ecmwf_vars
       DATA = data;
       E.(v).time = TIME;
       E.(v).data = DATA;
-      
+
   end
+
+  save e.mat E
+  disp('saving intermediate E') 
+  
 end
 
 % Times are a few seconds off the hour. Round to nearest hour. 

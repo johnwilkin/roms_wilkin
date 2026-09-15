@@ -55,11 +55,11 @@ warning('OFF','RomsGetGrid:NoVariable')
 
 if exist('stretching','file')~=2
   disp('You need to add stretching.m to your matlab path')
-  error('from e.g. https://www.myroms.org/svn/src/matlab/utility')
+  error('from https://github.com/myroms/roms_matlab/tree/main/utility')
 end
 if exist('set_depth','file')~=2
   disp('You need to add set_depth.m to your matlab path')
-  error('from e.g. https://www.myroms.org/svn/src/matlab/utility')
+  error('from https://github.com/myroms/roms_matlab/tree/main/utility')
 end
 
 if isstruct(grd_file)
@@ -158,29 +158,6 @@ else
     grd.lon_psi = interp2(xi_rho,eta_rho,grd.lon_rho,xi_psi,eta_psi);
     grd.lat_psi = interp2(xi_rho,eta_rho,grd.lat_rho,xi_psi,eta_psi);
   end
-  % to enable plotting of the perimeter, or data searches covering the
-  % domain bounding box
-  try
-    grd.bounding_box = [min(grd.lon_psi(:)) max(grd.lon_psi(:)) ...
-      min(grd.lat_psi(:)) max(grd.lat_psi(:))];
-  catch
-  end
-  try
-    grd.perimeter(:,1) = ...
-      [grd.lon_psi(1,:)' ; grd.lon_psi(:,end) ; ...
-      grd.lon_psi(end,end:-1:1)'; grd.lon_psi(end:-1:1,1)];
-    grd.perimeter(:,2) = ...
-      [grd.lat_psi(1,:)' ; grd.lat_psi(:,end) ; ...
-      grd.lat_psi(end,end:-1:1)'; grd.lat_psi(end:-1:1,1)];
-  catch
-  end
-  try
-    grd.corners = [grd.lon_rho(end,1) grd.lat_rho(end,1);
-      grd.lon_rho(1,1) grd.lat_rho(1,1);
-      grd.lon_rho(1,end) grd.lat_rho(1,end);
-      grd.lon_rho(end,end) grd.lat_rho(end,end)];
-  catch
-  end
   
   varlist = {'rdrag','rdrag2','ZoBot',...
     'wtype_grid','diff_factor','visc_factor'};
@@ -207,6 +184,34 @@ else
     grd.nomask = 1;
   end
   
+  % to enable plotting of the perimeter, or data searches covering the
+  % domain bounding box
+  try
+    grd.bounding_box = [min(grd.lon_rho(:)) max(grd.lon_rho(:)) ...
+      min(grd.lat_rho(:)) max(grd.lat_rho(:))];
+    grd.bounding_box_tight = [min(grd.mask_rho_nan(:).*grd.lon_rho(:)) ...
+      max(grd.mask_rho_nan(:).*grd.lon_rho(:)) ...
+      min(grd.mask_rho_nan(:).*grd.lat_rho(:)) ...
+      max(grd.mask_rho_nan(:).*grd.lat_rho(:))];
+  catch
+  end
+  try
+    grd.perimeter(:,1) = ...
+      [grd.lon_psi(1,:)' ; grd.lon_psi(:,end) ; ...
+      grd.lon_psi(end,end:-1:1)'; grd.lon_psi(end:-1:1,1)];
+    grd.perimeter(:,2) = ...
+      [grd.lat_psi(1,:)' ; grd.lat_psi(:,end) ; ...
+      grd.lat_psi(end,end:-1:1)'; grd.lat_psi(end:-1:1,1)];
+  catch
+  end
+  try
+    grd.corners = [grd.lon_rho(end,1) grd.lat_rho(end,1);
+      grd.lon_rho(1,1) grd.lat_rho(1,1);
+      grd.lon_rho(1,end) grd.lat_rho(1,end);
+      grd.lon_rho(end,end) grd.lat_rho(end,end)];
+  catch
+  end
+
   % If the grid file includes coastline data, such as a file being used
   % with the Rutgers version of editmask.m, load this too
   try

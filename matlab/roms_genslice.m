@@ -305,6 +305,9 @@ lonfull = netcdf.getVar(ncid,varid)';
 varid = netcdf.inqVarID(ncid,latname);
 latfull = netcdf.getVar(ncid,varid)';
 
+lonfull = double(lonfull);
+latfull = double(latfull);
+
 % s-coordinate parameters
 for vlist = roms_varlist('s-param')
   vname = char(vlist);
